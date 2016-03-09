@@ -18,6 +18,15 @@ Setting up Intel Edison on Linux (Ubuntu 14.04.3 Gnome)
 
     `./flashall.sh`
     (If the process doesn't initialte try to disconnect and remount the device). The flashing process might take 2 to 3          minutes)
+
+5. (alt) . If step 5 causes some problems, then download the Flash Tool Lite package from                        http://downloadmirror.intel.com/24910/eng/phoneflashtoollite_5.2.4.0_linux_x86_64.deb  (download the latest tool)
+
+    1. Install x86 c++ libs `sudo apt-get install gdebi libncurses5:i386 libstdc++6:i386`  
+    2. Install the <code>.deb</code> using gdebi or using Ubuntu software center
+    3. <code>(Optional) </code>Navigate into the Mount directory and remove all the old file `rm -rf *` 
+
     
-6. 
+    ###Setting up a serial terminal on a system with Linux*
+
+ 
 
