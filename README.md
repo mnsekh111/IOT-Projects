@@ -7,4 +7,5 @@ Setting up Intel Edison on Linux (Ubuntu 14.04.3 Gnome)
 1. Follow the steps provided in the below link to assemble intel edison and mount it on your computer
     https://software.intel.com/en-us/articles/assemble-the-intel-edison-board-with-the-mini-breakout-board
 
-2. 
+2. Open a Terminal window. To install dfu-util, which is an open source program that implements the USB DFU (USB Device         Firmware Upgrade) protocol, enter the command:
+    `sudo apt-get install dfu-util`
