@@ -24,6 +24,10 @@ Setting up Intel Edison on Linux (Ubuntu 14.04.3 Gnome)
     1. Install x86 c++ libs `sudo apt-get install gdebi libncurses5:i386 libstdc++6:i386`  
     2. Install the <code>.deb</code> using gdebi or using Ubuntu software center
     3. <code>(Optional) </code>Navigate into the Mount directory and remove all the old file `rm -rf *` 
+    4. Search for "Phone Flash Tool" in your applications and run it.
+    5. Select the edison-iotdk-image that was downloaded in step 3 and change the configuration from <em>RNDIS to CDC</em>
+    6. Click <b>Start to flash</b>. Disconnect and then reconnect the device and the application will take care of flashing
+    
 
     
     ###Setting up a serial terminal on a system with Linux*
