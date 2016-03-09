@@ -38,7 +38,47 @@ Setting up Intel Edison on Linux (Ubuntu 14.04.3 Gnome)
         `sudo screen /dev/ttyUSB0 115200`
     3. Press `Enter` twice. A login screen is displayed. At the login prompt, type `root` and press `Enter`.
       Press `Enter` when prompted for a password.
-    4. 
+    4. Now the root@edison terminal is open.
+    
+    <span style="background-color:red"><u>Setting up Wifi</u></span>
+    1. Type `configure_edison --wifi` <br/>If you get an error saying configure_edison: not found, you need to update your         firmware
+    2. Follow the steps which are straight forward. Once connected, try opening the ip address where Edison is hosted.
+        If unable to access the site, then it means the device is not properly connected to the network.
+    3. Change the password of the device using configure_edison --password
+    
+    other options to look out: <br/>
+  <pre> -h, --help            show this help message and exit
+  --setup               Goes through changing the device name, password, and
+                        wifi options
+  --name                Changes the device name
+  --password            Changes the device password
+  --wifi                Changes the wifi options
+  --showWiFiIP          IP address associated with the wireless interface
+  --showWiFiMode        Show current mode for the wireless interface
+  --version             Gets the current firmware version
+  --latest-version      Gets the latest firmware version
+  --disableOneTimeSetup
+                        Disable one-time setup with WiFi access point and
+                        enable WiFi client mode Append --persist to retain
+                        this setting after reboot
+  --enableOneTimeSetup  Enable one-time setup with WiFi access point and
+                        disable WiFi client mode. Append --persist to retain
+                        this setting after reboot
+  --toggleOneTimeSetup  Switch between one-time setup with WiFi access point
+                        and WiFi client mode, and visa-versa. Append --persist
+                        to retain this setting after reboot
+  --upgrade             Downloads the latest firmware. Append --restartWithAP
+                        to reboot in WiFi access point mode after flashing
+  --flash <version> [<release name> ...]
+                        Downloads and flashes an image Append --restartWithAP
+                        to reboot in WiFi access point mode after flashing
+  --flashFile <image-file>
+                        Flashes the given image (.zip). Append --restartWithAP
+                        to reboot WiFi access point mode after flashing
+  --showNames           Show device name and SSID
+</pre>
+    
+    
 
  
 
