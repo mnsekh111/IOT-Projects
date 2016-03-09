@@ -30,17 +30,18 @@ Setting up Intel Edison on Linux (Ubuntu 14.04.3 Gnome)
     
 
     
-    <span style="background-color:red"><u>Setting up a serial terminal on a system with Linux</u></span>
+    ###<span style="background-color:red">Setting up a serial terminal on a system with Link</span>
     
     1. Install Screen shell session manager installed, open a new Terminal window. Enter the command: <br />
         `sudo apt-get install screen`
     2. To connect to the board, enter the command (where ttyUSB0 is your connected device):
         `sudo screen /dev/ttyUSB0 115200`
     3. Press `Enter` twice. A login screen is displayed. At the login prompt, type `root` and press `Enter`.
-      Press `Enter` when prompted for a password.
+        Press `Enter` when prompted for a password.
     4. Now the root@edison terminal is open.
     
-    <span style="background-color:red"><u>Setting up Wifi</u></span>
+    ###<span style="background-color:red">Setting up Wifi</span>
+    
     1. Type `configure_edison --wifi` <br/>If you get an error saying configure_edison: not found, you need to update your         firmware
     2. Follow the steps which are straight forward. Once connected, try opening the ip address where Edison is hosted.
         If unable to access the site, then it means the device is not properly connected to the network.
