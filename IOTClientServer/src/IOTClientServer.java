@@ -3,13 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+package javaclientserver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import static java.lang.System.out;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,57 +19,55 @@ import java.util.logging.Logger;
  *
  * @author mns
  */
-public class EchoClient {
+public class EchoServer {
 
     public static void main(String[] args) {
-        //String serverHostname = new String("127.0.0.1");
-        String serverHostname = new String("192.168.0.21");
         int portNum = 9991;
 
-        System.out.println("Attemping to connect to host "
-                + serverHostname + " on port "+portNum+".");
-
-        Socket socket = null;
-        PrintWriter out = null;
-        BufferedReader in = null;
+        ServerSocket serverSocket = null;
+        Socket clientSocket = null;
 
         try {
-
-            socket = new Socket(serverHostname, portNum);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(
-                    socket.getInputStream()));
-        } catch (UnknownHostException e) {
-            System.err.println("Unknown host " + serverHostname);
+            serverSocket = new ServerSocket(portNum);
+            System.out.println("Listening on port " + portNum);
+        } catch (IOException ie) {
+            System.err.println("Error listening at port " + portNum + "\n" + ie.getLocalizedMessage());
             System.exit(1);
+        }
+
+        try {
+            clientSocket = serverSocket.accept();
         } catch (IOException e) {
-            System.err.println("Couldn't connect to " + serverHostname);
+            System.err.println("Accept failed.");
             System.exit(1);
         }
 
-        BufferedReader stdIn = new BufferedReader(
-                new InputStreamReader(System.in));
-        String userInput;
-
-        System.out.print("Enter a message : ");
         try {
-            while ((userInput = stdIn.readLine()) != null) {
-                out.println(userInput);
-                System.out.println("echo: " + in.readLine());
-                System.out.print("Enter a message : ");
+            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(),
+                    true);
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(clientSocket.getInputStream()));
+
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                System.out.println("Server: " + inputLine);
+                out.println(inputLine);
+
+                if (inputLine.equals("Bye.")) {
+                    break;
+                }
             }
-        } catch (IOException ex) {
-            Logger.getLogger(EchoClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        try {
 
             out.close();
             in.close();
-            stdIn.close();
-            socket.close();
+            clientSocket.close();
+            serverSocket.close();
+            
         } catch (IOException ex) {
-            Logger.getLogger(EchoClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EchoServer.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }
+
 }
