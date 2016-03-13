@@ -78,6 +78,12 @@ Setting up Intel Edison on Linux (Ubuntu 14.04.3 Gnome)
                         to reboot WiFi access point mode after flashing
   --showNames           Show device name and SSID
 </pre>
+
+<hr/>
+#Arduino Uno
+
+## Understanding breadboard (For an electronics noob like me)
+    https://www.youtube.com/watch?v=Iy7DY2UbHvM
     
     
 
