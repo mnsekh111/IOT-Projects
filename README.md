@@ -82,7 +82,7 @@ Setting up Intel Edison on Linux (Ubuntu 14.04.3 Gnome)
 <hr/>
 #Arduino Uno
 
-## Understanding breadboard (For an electronics noob like me)
+#### Understanding breadboard (For an electronics noob like me)
     https://www.youtube.com/watch?v=Iy7DY2UbHvM
     
     
