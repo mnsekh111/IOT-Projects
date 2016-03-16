@@ -85,6 +85,11 @@ Setting up Intel Edison on Linux (Ubuntu 14.04.3 Gnome)
 #### Understanding breadboard (For an electronics noob like me)
     https://www.youtube.com/watch?v=Iy7DY2UbHvM
     
+##Setting up wifi in Arduino:
+1: Mount the ESP6266 Wifi Shield over the arduino board
+2. Learn more about the wifi shield here <br>
+    https://learn.sparkfun.com/tutorials/esp8266-wifi-shield-hookup-guide
+    
     
 
  
