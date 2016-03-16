@@ -98,7 +98,12 @@ LED indicator location
 
 The blue status LED is tied into the firmware of the ESP8266. It’ll blink, be solid, or turn off depending on which state it’s in.
 
-
+<table class="table table-striped table-bordered">
+<tbody><tr><th>LED State</th><th>ESP8266 State</th></tr>
+<tr><td>Off</td><td>WiFi disconnected. Not configured.</td></tr>
+<tr><td>Blinking</td><td>Station mode: ESP8266 attempting to connect to access point.<br>AP mode: ESP8266 waiting for incoming connections</td></tr>
+<tr><td>On</td><td>Station mode: ESP8266 connected to access point.<br>AP mode: Devices connected to ESP8266 AP.</td></tr>
+</tbody></table>
 LED State	ESP8266 State
 Off	WiFi disconnected. Not configured.
 Blinking	Station mode: ESP8266 attempting to connect to access point.
