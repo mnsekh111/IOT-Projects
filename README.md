@@ -89,6 +89,23 @@ Setting up Intel Edison on Linux (Ubuntu 14.04.3 Gnome)
 1: Mount the ESP6266 Wifi Shield over the arduino board
 2. Learn more about the wifi shield here <br>
     https://learn.sparkfun.com/tutorials/esp8266-wifi-shield-hookup-guide
+
+LED Indicators
+
+The WiFi Shield includes two LED indicators: a simple red power indicator and a blue “status” LED. The red power LED should illuminate whenever power is being delivered from the Arduino to the ESP8266 Shield. If you need to debug anything, checking for this LED should be your first step.
+
+LED indicator location
+
+The blue status LED is tied into the firmware of the ESP8266. It’ll blink, be solid, or turn off depending on which state it’s in.
+
+
+LED State	ESP8266 State
+Off	WiFi disconnected. Not configured.
+Blinking	Station mode: ESP8266 attempting to connect to access point.
+AP mode: ESP8266 waiting for incoming connections
+On	Station mode: ESP8266 connected to access point.
+AP mode: Devices connected to ESP8266 AP.
+The status LED is tied to GPIO 5 of the ESP8266.
     
     
 
