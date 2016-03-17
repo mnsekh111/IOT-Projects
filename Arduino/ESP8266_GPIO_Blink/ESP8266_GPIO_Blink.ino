@@ -51,7 +51,7 @@ void setup()
 void loop() 
 {
   esp8266.digitalWrite(5, HIGH);
-  delay(500);
+  delay(100);
   esp8266.digitalWrite(5, LOW);
-  delay(500);
+  delay(100);
 }
