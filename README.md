@@ -127,7 +127,7 @@ The status LED is tied to GPIO 5 of the ESP8266.
 5. (optional) In the <code>project properties</code> under <code>Libraries</code>, add RXTXComm.jar and in <code>Run , VM Options</code> add the location of the jni compatible .so file (Not necessary as you have already pasted that in /jre/lib/amd64)
     -Djava.library.path=/home/mns/Downloads/rxtx-2.1-7-bins-r2/Linux/x86_64-unknown-linux-gnu/librxtxSerial.so
 
-6. <div style="background-color:cyan">Run Netbeans in root mode</div>. 
+6. <div style="background-color:cyan">Run Netbeans in root mode</div>. Otherwise <code>CommPortIdentifier.getPortIdentifiers();</code> will return empty/null
     
     
 
