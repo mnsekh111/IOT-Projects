@@ -120,7 +120,14 @@ The status LED is tied to GPIO 5 of the ESP8266.
     2. Copy librxtxSerial.so ---> <JAVA_HOME>/jre/lib/amd64/
     3. Copy librxtxParallel.so ---> <JAVA_HOME>/jre/lib/amd64/
 
-3. 
+3. Go to the following website and download the code <br>
+    http://playground.arduino.cc/Interfacing/Java
+
+4. Install an IDE like netbeans and create a Java project and paste the code available in the above mentioned website.
+5. (optional) In the <code>project properties</code> under <code>Libraries</code>, add RXTXComm.jar and in <code>Run , VM Options</code> add the location of the jni compatible .so file (Not necessary as you have already pasted that in /jre/lib/amd64)
+    -Djava.library.path=/home/mns/Downloads/rxtx-2.1-7-bins-r2/Linux/x86_64-unknown-linux-gnu/librxtxSerial.so
+
+6. <div class="text-primary">Run Netbeans in root mode</div>
     
     
 
