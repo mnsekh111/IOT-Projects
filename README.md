@@ -111,6 +111,16 @@ AP mode: ESP8266 waiting for incoming connections
 On	Station mode: ESP8266 connected to access point.
 AP mode: Devices connected to ESP8266 AP.
 The status LED is tied to GPIO 5 of the ESP8266.
+
+
+###Arduino Serial Comm Set up
+1. Download the java rxtx libraray from <br>http://fizzed.com/oss/rxtx-for-java
+2. Extract the above zip and do the following <br>
+    1. Copy RXTXcomm.jar ---> <JAVA_HOME>/jre/lib/ext
+    2. Copy librxtxSerial.so ---> <JAVA_HOME>/jre/lib/amd64/
+    3. Copy librxtxParallel.so ---> <JAVA_HOME>/jre/lib/amd64/
+
+3. 
     
     
 
