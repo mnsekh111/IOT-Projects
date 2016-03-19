@@ -9,7 +9,7 @@ package iot;
  *
  * @author mns (Sekharan Natarajan)
  */
-public class PC2UserInterface extends javax.swing.JFrame {
+public class PC2UserInterface extends javax.swing.JFrame{
 
     /**
      * Creates new form PC2Interface
@@ -98,11 +98,11 @@ public class PC2UserInterface extends javax.swing.JFrame {
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
      
         // TODO add your handling code here:
-        ArdSerial.getInstance().start();
+        ArdSerial.getInstance(messenger).start();
     }//GEN-LAST:event_btnStartActionPerformed
 
     private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
-        ArdSerial.getInstance().stop();
+        ArdSerial.getInstance(messenger).stop();
     }//GEN-LAST:event_btnStopActionPerformed
 
     /**
@@ -148,4 +148,12 @@ public class PC2UserInterface extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea textOutput;
     // End of variables declaration//GEN-END:variables
+
+    private IMessenger messenger = new IMessenger() {
+        @Override
+        public void sendMessage(String str) {
+            textOutput.setText(textOutput.getText()+str);
+        }
+    };
+
 }

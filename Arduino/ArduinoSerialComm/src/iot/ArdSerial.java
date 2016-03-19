@@ -13,6 +13,12 @@ import com.fazecast.jSerialComm.*;
  */
 class PacketListener implements Runnable, SerialPortPacketListener {
 
+    private IMessenger mess = null;
+
+    public PacketListener(IMessenger imes) {
+        this.mess = imes;
+    }
+
     @Override
     public int getListeningEvents() {
         return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
@@ -26,11 +32,10 @@ class PacketListener implements Runnable, SerialPortPacketListener {
     @Override
     public void serialEvent(SerialPortEvent event) {
         byte[] newData = event.getReceivedData();
-        System.out.println("Received data of size: " + newData.length);
+        mess.sendMessage("\nReceived data of size: " + newData.length + "\n");
         for (int i = 0; i < newData.length; ++i) {
-            System.out.print((char) newData[i]);
+            mess.sendMessage("" + (char) newData[i]);
         }
-        System.out.println("\n");
     }
 
     @Override
@@ -42,27 +47,31 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 public class ArdSerial {
 
     private static ArdSerial instance = null;
+    private IMessenger mess = null;
     private SerialPort comPort;
     private PacketListener listener = null;
 
-    private ArdSerial() {
+    private ArdSerial(IMessenger imes) {
         comPort = SerialPort.getCommPorts()[0];
-        listener = new PacketListener();
-
+        listener = new PacketListener(imes);
+        mess = imes;
     }
 
-    public static ArdSerial getInstance(){
-        if(instance == null){
-            return new ArdSerial();
+    public static ArdSerial getInstance(IMessenger imes) {
+        if (instance == null) {
+            return new ArdSerial(imes);
         }
         return instance;
     }
-    
+
     public void start() {
 
         if (!comPort.isOpen()) {
             comPort.openPort();
             comPort.addDataListener(listener);
+             mess.sendMessage("\nThe port is opened successfully ! \n");
+        }else{
+            mess.sendMessage("\nThe port is already open \n");
         }
     }
 
@@ -70,11 +79,14 @@ public class ArdSerial {
         if (comPort.isOpen()) {
             comPort.removeDataListener();
             comPort.closePort();
+             mess.sendMessage("\nThe port is closed successfully \n");
+        }else{
+            mess.sendMessage("\nThe port already closed \n");
         }
         deinit();
     }
-    
-    private void deinit(){
+
+    private void deinit() {
         instance = null;
     }
 }
