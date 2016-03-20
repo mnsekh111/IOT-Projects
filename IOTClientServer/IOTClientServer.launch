@@ -14,7 +14,7 @@
 <mapAttribute key="org.eclipse.jdt.launching.CONNECT_MAP">
 <mapEntry key="hostname" value="192.168.0.21"/>
 <mapEntry key="port" value="8000"/>
-<mapEntry key="timeout" value="20000"/>
+<mapEntry key="timeout" value="2000"/>
 </mapAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="IOTClientServer"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="IOTClientServer"/>
