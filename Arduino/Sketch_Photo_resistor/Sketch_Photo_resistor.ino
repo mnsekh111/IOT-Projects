@@ -25,17 +25,10 @@ void setup()
 
 void loop()
 {
-    int analogReading=analogRead(lightPin);
-    if (analogReading<10)
-      Serial.print("off:"); //Write the value of the photoresistor to the serial monitor.
-    else if (analogReading>20)
-      Serial.print("on :"); //Write the value of the photoresistor to the serial monitor.
-    else
-      Serial.print("???:"); //Write the value of the photoresistor to the serial monitor.
-    Serial.println(analogReading);          
-    
-    //analogWrite(ledPin, analogRead(lightPin)/2);  //send the value to the ledPin. Depending on value of resistor 
+    Serial.println(analogRead(lightPin)); //Write the value of the photoresistor to the serial monitor.
+    analogWrite(ledPin, analogRead(lightPin)/2);  //send the value to the ledPin. Depending on value of resistor 
                                                 //you have  to divide the value. for example, 
                                                 //with a 10k resistor divide the value by 2, for 100k resistor divide by 4.
-   delay(100); //short delay for faster response to light.
+   delay(10); //short delay for faster response to light.
 }
+
