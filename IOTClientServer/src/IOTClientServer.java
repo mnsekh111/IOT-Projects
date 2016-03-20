@@ -33,6 +33,17 @@ class PC1Handler extends Thread {
 					fout.write(byteArray);
 				}
 
+				/*
+				 * 
+				 * 
+				 * Rasberry pi GPIO handling Code goes here
+				 * 
+				 * 
+				 */
+				
+				
+				
+				
 				in.close();
 				fout.close();
 				clientSocket.close();
@@ -62,6 +73,16 @@ class PC2Handler extends Thread {
 
 				BufferedInputStream in = new BufferedInputStream(
 						clientSocket.getInputStream());
+				/*
+				 * 
+				 * 
+				 * 
+				 * 
+				 * ACK parsing from PC2 goes here
+				 * 
+				 * 
+				 * 
+				 */
 
 			}
 
@@ -115,7 +136,7 @@ public class IOTClientServer {
 			String source = clientSocket.getInetAddress()
 					.getCanonicalHostName();
 			// System.out.println(source);
-			if (source.contentEquals("pc1-client")) {
+			if (source.contentEquals("localhost")) {
 				PC1Handler handler = new PC1Handler(clientSocket);
 				handler.start();
 
