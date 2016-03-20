@@ -31,3 +31,4 @@ void loop()
                                                 //with a 10k resistor divide the value by 2, for 100k resistor divide by 4.
    delay(10); //short delay for faster response to light.
 }
+
