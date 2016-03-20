@@ -4,13 +4,15 @@ Connect the photoresistor one leg to pin 0, and pin to +5V
 Connect a resistor (around 10k is a good value, higher
 values gives higher readings) from pin 0 to GND. (see appendix of arduino notebook page 37 for schematics).
 
+
 ----------------------------------------------------
 
-           PhotoR     10K
- +5    o---/\/\/--.--/\/\/---o GND
-                  |
- Pin 0 o-----------
-
+                PhotoD     
+ GND    o-------/\/\/----------.--o  Pin 0
+                  |            | 
+ GND    o---------|----/\/\/---|
+                         10M
+                             
 ----------------------------------------------------
 */
 
