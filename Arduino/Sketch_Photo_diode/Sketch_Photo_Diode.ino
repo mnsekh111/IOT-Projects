@@ -18,31 +18,40 @@ values gives higher readings) from pin 0 to GND. (see appendix of arduino notebo
 
 int lightPin = 0;  //define a pin for Photo resistor
 int ledPin = 11;     //define a pin for LED
-int normalLight = 0;  //calibration for normal light value
+int normalLight = 0;  //calibration for normal light value; leave at 0 for calibration to determine
+float low_tolerance = 0.70; //if light is less than 70% normal, then low
+float high_tolerance =  0.90; //if light is more than 90% normal, then high
+
 
 void setup()
 {
     Serial.begin(9600);  //Begin serial communcation
     pinMode( ledPin, OUTPUT );
-    delay(1000);//wait one second.
-    int analogReading1=analogRead(lightPin);
-    delay(1000);//wait one second.
-    int analogReading2=analogRead(lightPin);
-    delay(1000);//wait one second.
-    int analogReading3=analogRead(lightPin);
-
-    normalLight = (analogReading1+analogReading2+analogReading3)/3;
+    if (normalLight=0){
+      delay(1000);//wait one second.
+      int analogReading1=analogRead(lightPin);
+      delay(1000);//wait one second.
+      int analogReading2=analogRead(lightPin);
+      delay(1000);//wait one second.
+      int analogReading3=analogRead(lightPin);
+      normalLight = (analogReading1+analogReading2+analogReading3)/3;
+    }
+    
     Serial.print("debug: baseline set to:"); //Write the value of the photodiode to the serial monitor.
     Serial.println(normalLight); //Write the value of the photodiode to the serial monitor.
+    Serial.print("low set to:"); //Write the value of the photodiode to the serial monitor.
+    Serial.println(normalLight*low_tolerance); //Write the value of the photodiode to the serial monitor.
+    Serial.print("high set to:"); //Write the value of the photodiode to the serial monitor.
+    Serial.println(normalLight*high_tolerance); //Write the value of the photodiode to the serial monitor.
 
 }
 
 void loop()
 {
     int analogReading=analogRead(lightPin);
-    if (analogReading<normalLight*.80)
+    if (analogReading<normalLight*low_tolerance)
       Serial.print("off:"); //Write the value of the photodiode to the serial monitor.
-    else if (analogReading>normalLight*1.20)
+    else if (analogReading>normalLight*high_tolerance)
       Serial.print("on :"); //Write the value of the photodiode to the serial monitor.
     else
       Serial.print("???:"); //Write the value of the photodiode to the serial monitor.
