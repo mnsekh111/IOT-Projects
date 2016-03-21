@@ -1,73 +1,157 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package javaclientserver;
-
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import static java.lang.System.out;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
- *
- * @author mns
- */
-public class EchoServer {
+class PC1Handler extends Thread {
+	private Socket clientSocket = null;
 
-    public static void main(String[] args) {
-        int portNum = 9991;
+	public PC1Handler(Socket soc) {
+		this.clientSocket = soc;
+	}
 
-        ServerSocket serverSocket = null;
-        Socket clientSocket = null;
+	@Override
+	public void run() {
+		try {
+			if (clientSocket != null) {
+				File file = new File("samplefile");
+				FileOutputStream fout = new FileOutputStream(file);
+				BufferedInputStream in = new BufferedInputStream(
+						clientSocket.getInputStream());
 
-        try {
-            serverSocket = new ServerSocket(portNum);
-            System.out.println("Listening on port " + portNum);
-        } catch (IOException ie) {
-            System.err.println("Error listening at port " + portNum + "\n" + ie.getLocalizedMessage());
-            System.exit(1);
-        }
+				byte[] byteArray = new byte[1024];
 
-        try {
-            clientSocket = serverSocket.accept();
-        } catch (IOException e) {
-            System.err.println("Accept failed.");
-            System.exit(1);
-        }
+				while (in.read(byteArray) != -1) {
+					fout.write(byteArray);
+				}
 
-        try {
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(),
-                    true);
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream()));
+				/*
+				 * 
+				 * 
+				 * Rasberry pi GPIO handling Code goes here
+				 * 
+				 * 
+				 */
+				
+				
+				
+				
+				in.close();
+				fout.close();
+				clientSocket.close();
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-            String inputLine;
+	}
+}
 
-            while ((inputLine = in.readLine()) != null) {
-                System.out.println("Server: " + inputLine);
-                out.println(inputLine);
+class PC2Handler extends Thread {
+	private Socket clientSocket = null;
 
-                if (inputLine.equals("Bye.")) {
-                    break;
-                }
-            }
+	public PC2Handler(Socket soc) {
+		this.clientSocket = soc;
+	}
 
-            out.close();
-            in.close();
-            clientSocket.close();
-            serverSocket.close();
-            
-        } catch (IOException ex) {
-            Logger.getLogger(EchoServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+	@Override
+	public void run() {
+		try {
+			if (clientSocket != null) {
 
-    }
+				BufferedInputStream in = new BufferedInputStream(
+						clientSocket.getInputStream());
+				/*
+				 * 
+				 * 
+				 * 
+				 * 
+				 * ACK parsing from PC2 goes here
+				 * 
+				 * 
+				 * 
+				 */
 
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+}
+
+public class IOTClientServer {
+
+	// uncomment the following portion for running this code in Intel Edison
+	// "from Eclipse"
+	// static {
+	// try {
+	// System.loadLibrary("mraajava");
+	// } catch (UnsatisfiedLinkError e) {
+	// System.err
+	// .println("Native code library failed to load. See the chapter on Dynamic Linking Problems in the SWIG Java documentation for help.\n"
+	// + e);
+	// System.exit(1);
+	// }
+	// }
+
+	public static void main(String[] args) {
+		int portNum = 9991;
+		boolean runforever = true;
+
+		ServerSocket serverSocket = null;
+		Socket clientSocket = null;
+
+		try {
+			serverSocket = new ServerSocket(portNum);
+			System.out.println("Listening on port " + portNum);
+		} catch (IOException ie) {
+			System.err.println("Error listening at port " + portNum + "\n"
+					+ ie.getLocalizedMessage());
+			System.exit(1);
+		}
+
+		while (runforever) {
+			try {
+				clientSocket = serverSocket.accept();
+			} catch (IOException e) {
+				System.err.println("Accept failed.");
+				System.exit(1);
+			}
+
+			String source = clientSocket.getInetAddress()
+					.getCanonicalHostName();
+			// System.out.println(source);
+			if (source.contentEquals("localhost")) {
+				PC1Handler handler = new PC1Handler(clientSocket);
+				handler.start();
+
+			} else if (source.contentEquals("pc2-client")) {
+				PC2Handler handler = new PC2Handler(clientSocket);
+				handler.start();
+
+			}
+		}
+
+		try {
+			serverSocket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
