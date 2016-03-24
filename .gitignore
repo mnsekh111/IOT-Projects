@@ -1,3 +1,6 @@
 /Arduino/ArduinoSerialComm/nbproject/private/
 /Arduino/ArduinoSerialComm/build/
 /Arduino/KeyListener/nbproject/private/
+*.properties
+*.xml
+*.log
