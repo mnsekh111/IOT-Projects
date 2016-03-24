@@ -25,8 +25,8 @@ import java.util.logging.Logger;
 public class PC1Client {
 
 	public static void main(String[] args) {
-		String serverHostname = new String("127.0.0.1");
-		// String serverHostname = new String("192.168.43.128");
+		//String serverHostname = new String("127.0.0.1");
+		String serverHostname = new String("192.168.43.128");
 		int portNum = 9991;
 
 		System.out.println("Attemping to connect to host " + serverHostname
@@ -57,10 +57,16 @@ public class PC1Client {
 
 		try {
 			if (choice == 1) {
-				System.out.print("Enter a message : ");
+
+				System.out.print("Enter Live messages : ");
 				String userInput = sc.nextLine();
-				byte[] byteArray = userInput.getBytes();
-				out.write(byteArray, 0, byteArray.length);
+				while (!userInput.contentEquals("!q")) {
+					byte[] byteArray = userInput.getBytes();
+					out.write(byteArray, 0, byteArray.length);
+					out.flush();
+					//System.out.print("Done");
+					userInput = sc.nextLine();
+				}
 
 				System.out
 						.println("Message sent successfully to Rasberry pi \n");
@@ -69,11 +75,11 @@ public class PC1Client {
 
 				if (!file.exists()) {
 					file.createNewFile();
-					/*Write some dummy data into the file */
-					
+					/* Write some dummy data into the file */
+
 					/* Finish */
 				}
-				
+
 				byte[] byteArray = new byte[(int) file.length()];
 				FileInputStream fis = new FileInputStream(file);
 				BufferedInputStream bis = new BufferedInputStream(fis);
