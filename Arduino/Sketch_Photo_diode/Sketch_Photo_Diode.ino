@@ -20,8 +20,8 @@ int lightPin = 0;  //define a pin for Photo resistor
 int ledPin = 11;     //define a pin for LED
 int normalLight = 0;  //calibration for normal light value; leave at 0 for calibration to determine
 int highLight = 0;  //calibration for normal light value; leave at 0 for calibration to determine
-float normal_tolerance = 1.30; //if light is less than 70% normal, then low
-float high_tolerance =  0.70; //if light is more than 90% highest, then high
+float normal_tolerance = 1.30; //accept values within 130% of normal/low
+float high_tolerance =  0.70; //accept values within 70% of high for high.
 
 
 void setup()
