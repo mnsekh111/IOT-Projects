@@ -64,12 +64,12 @@ void loop()
 {
     int analogReading=analogRead(lightPin);
     if (analogReading<normalLight*normal_tolerance)
-      Serial.print("off:"); //Write the value of the photodiode to the serial monitor.
+      Serial.print("0"); //Write the value of the photodiode to the serial monitor.
     else if (analogReading>highLight*high_tolerance)
-      Serial.print("on :"); //Write the value of the photodiode to the serial monitor.
-    else
-      Serial.print("???:"); //Write the value of the photodiode to the serial monitor.
-    Serial.println(analogReading);          
+      Serial.print("1"); //Write the value of the photodiode to the serial monitor.
+//    else
+//      Serial.print("???:"); //Write the value of the photodiode to the serial monitor.
+    //Serial.println(analogReading);          
     
-   delay(100); //short delay for faster response to light.
+   delay(10); //short delay for faster response to light.
 }
