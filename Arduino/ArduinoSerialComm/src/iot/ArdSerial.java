@@ -26,14 +26,13 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 
     @Override
     public int getPacketSize() {
-        return 1;
+        return 100;
     }
 
     @Override
     public void serialEvent(SerialPortEvent event) {
         byte[] newData = event.getReceivedData();
-        //mess.sendMessage("\nReceived data of size: " + newData.length + "\n");    
-        //mess.sendMessage(newData);
+        mess.sendMessage("\nReceived data of size: " + newData.length + "\n");
         for (int i = 0; i < newData.length; ++i) {
             mess.sendMessage("" + (char) newData[i]);
         }
