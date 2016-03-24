@@ -11,11 +11,30 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.PinState;
+import com.pi4j.io.gpio.RaspiPin;
+
 class PC1Handler extends Thread {
 	private Socket clientSocket = null;
+	private static final int READ_SIZE = 1;
+
+	private GpioController gpio = null;
+	private GpioPinDigitalOutput pin = null;
 
 	public PC1Handler(Socket soc) {
 		this.clientSocket = soc;
+		 gpio = GpioFactory.getInstance();
+		 pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "MyLED",
+		 PinState.LOW);
+		 pin.setShutdownOptions(true, PinState.LOW);
+
+	}
+
+	private boolean isSet(byte value, int bit) {
+		return (value & (1 << bit)) != 0;
 	}
 
 	@Override
@@ -27,23 +46,32 @@ class PC1Handler extends Thread {
 				BufferedInputStream in = new BufferedInputStream(
 						clientSocket.getInputStream());
 
-				byte[] byteArray = new byte[1024];
+				byte[] byteArray = new byte[READ_SIZE];
 
 				while (in.read(byteArray) != -1) {
+					// System.out.println("Received i :99"+(char)byteArray[0]);
 					fout.write(byteArray);
+					fout.flush();
+
+				
+					for (int i = 0; i < 8; i++) {
+						if (isSet(byteArray[0],i)) {
+							pin.pulse(1000, true);
+							System.out.print("1");
+						} else {
+							System.out.print("0");
+							pin.low();
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
 				}
 
-				/*
-				 * 
-				 * 
-				 * Rasberry pi GPIO handling Code goes here
-				 * 
-				 * 
-				 */
-				
-				
-				
-				
+				gpio.shutdown();
 				in.close();
 				fout.close();
 				clientSocket.close();
@@ -79,9 +107,6 @@ class PC2Handler extends Thread {
 				 * 
 				 * 
 				 * ACK parsing from PC2 goes here
-				 * 
-				 * 
-				 * 
 				 */
 
 			}
@@ -118,6 +143,7 @@ public class IOTClientServer {
 
 		try {
 			serverSocket = new ServerSocket(portNum);
+			
 			System.out.println("Listening on port " + portNum);
 		} catch (IOException ie) {
 			System.err.println("Error listening at port " + portNum + "\n"
@@ -127,6 +153,7 @@ public class IOTClientServer {
 
 		while (runforever) {
 			try {
+				System.out.println("Waiting for Client sockets");
 				clientSocket = serverSocket.accept();
 			} catch (IOException e) {
 				System.err.println("Accept failed.");
@@ -135,8 +162,8 @@ public class IOTClientServer {
 
 			String source = clientSocket.getInetAddress()
 					.getCanonicalHostName();
-			// System.out.println(source);
-			if (source.contentEquals("localhost")) {
+			System.out.println("PCI client connected to " + source);
+			if (source.contentEquals("localhost") || source.contentEquals("mns-G551JW")) {
 				PC1Handler handler = new PC1Handler(clientSocket);
 				handler.start();
 
