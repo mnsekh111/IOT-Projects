@@ -5,6 +5,7 @@
  */
 package iot;
 
+import packetizer.SinglePacket2;
 import com.fazecast.jSerialComm.*;
 
 /**
@@ -14,7 +15,6 @@ import com.fazecast.jSerialComm.*;
 class PacketListener implements Runnable, SerialPortPacketListener {
 
     private IMessenger mess = null;
-    private int READ_SIZE = 1;
     public PacketListener(IMessenger imes) {
         this.mess = imes;
     }
@@ -26,7 +26,7 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 
     @Override
     public int getPacketSize() {
-        return READ_SIZE;
+        return (SinglePacket2.frame_num_end+1)/8;
     }
 
     @Override
@@ -72,6 +72,7 @@ public class ArdSerial {
              mess.sendMessage("\nThe port is opened successfully ! \n");
         }else{
             mess.sendMessage("\nThe port is already open \n");
+            SinglePacket2.initSinglePacket(0, 0, 0, 7, 7, 7);
         }
     }
 
