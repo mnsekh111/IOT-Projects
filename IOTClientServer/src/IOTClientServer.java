@@ -1,13 +1,8 @@
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -52,23 +47,25 @@ class PC1Handler extends Thread {
 					// System.out.println("Received i :99"+(char)byteArray[0]);
 					fout.write(byteArray);
 					fout.flush();
-
+					
+					pin.pulse(500, true);
 				
 					for (int i = 0; i < 8; i++) {
 						if (isSet(byteArray[0],i)) {
-							pin.pulse(1000, true);
+							pin.pulse(100, true);
 							System.out.print("1");
 						} else {
 							System.out.print("0");
 							pin.low();
 							try {
-								Thread.sleep(1000);
+								Thread.sleep(100);
 							} catch (InterruptedException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
 					}
+					pin.pulse(500, true);
 				}
 
 				gpio.shutdown();
@@ -163,7 +160,7 @@ public class IOTClientServer {
 			String source = clientSocket.getInetAddress()
 					.getCanonicalHostName();
 			System.out.println("PCI client connected to " + source);
-			if (source.contentEquals("localhost") || source.contentEquals("mns-G551JW")) {
+			if (source.contentEquals("localhost") || source.contentEquals("mns-G551JW") || source.contentEquals("vitellius")) {
 				PC1Handler handler = new PC1Handler(clientSocket);
 				handler.start();
 
