@@ -27,10 +27,7 @@ public class PC1Client {
 
 	public static void main(String[] args) {
 		String serverHostname;
-		if(args[0].equalsIgnoreCase("debug"))
-			serverHostname = new String("127.0.0.1");
-		else 
-			serverHostname = new String("192.168.43.128");
+		serverHostname = new String("192.168.43.128");
 		int portNum = 9991;
 
 		System.out.println("Attemping to connect to host " + serverHostname + " on port " + portNum + ".");
@@ -70,7 +67,7 @@ public class PC1Client {
 				while (true) {
 					int inputAscii = reader.read();
 
-					if (String.valueOf(inputAscii).equalsIgnoreCase("q"))
+					if (String.valueOf(inputAscii).equalsIgnoreCase("9"))
 						break;
 					
 					byte[] byteArray = BigInteger.valueOf(inputAscii).toByteArray();
@@ -86,15 +83,12 @@ public class PC1Client {
 				cmd = new String[] { "/bin/sh", "-c", "stty sane </dev/tty" };
 				Runtime.getRuntime().exec(cmd).waitFor();
 			} else if (choice == 2) {
-				File file = new File("samplefile");
+				System.out.println("Enter the name of the file :");
+				Scanner scanner = new Scanner(System.in);
+				String fileName = scanner.nextLine();
 
-				if (!file.exists()) {
-					file.createNewFile();
-					/* Write some dummy data into the file */
-
-					/* Finish */
-				}
-
+				File file = new File(fileName);
+				
 				byte[] byteArray = new byte[(int) file.length()];
 				FileInputStream fis = new FileInputStream(file);
 				BufferedInputStream bis = new BufferedInputStream(fis);

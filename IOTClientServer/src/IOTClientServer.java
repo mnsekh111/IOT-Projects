@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.BitSet;
 import java.util.Scanner;
 
 import com.pi4j.io.gpio.GpioController;
@@ -19,6 +18,7 @@ class PC1Handler extends Thread {
 	private Socket clientSocket = null;
 	private static final int KEYSTROKE_READ_SIZE = 1;
 	private static final int FILE_READ_SIZE = 16;
+	private static final int MESSAGE_ID_SIZE = 1;
 	private int mode;
 	private GpioController gpio = null;
 	private GpioPinDigitalOutput pin = null;
@@ -46,7 +46,34 @@ class PC1Handler extends Thread {
 	}
 
 	private void handleFiles() {
-		// TODO Auto-generated method stub
+		try {
+			if (clientSocket != null) {
+				File file = new File("samplefile");
+				FileOutputStream fout = new FileOutputStream(file);
+				BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
+				
+				byte[] byteArray = new byte[FILE_READ_SIZE];
+				int messageId = 0;
+				
+				while (in.read(byteArray) != -1) {
+					fout.write(byteArray);
+					fout.flush();
+
+					byte[] packet = constructPacket(messageId, byteArray);
+
+					handleGPIOPacket(packet);
+
+					if (messageId == 255)
+						messageId = 0;
+					else
+						messageId++;
+				}
+				
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -66,7 +93,7 @@ class PC1Handler extends Thread {
 
 					byte[] packet = constructPacket(messageId, byteArray);
 
-					handleGPIO(packet);
+					handleGPIOPacket(packet);
 
 					if (messageId == 255)
 						messageId = 0;
@@ -103,12 +130,27 @@ class PC1Handler extends Thread {
 	 * This method will accept bytes, construct packet to be sent and handle GPIO accordingly
 	 * @param byteArray
 	 */
-	private void handleGPIO(byte[] byteArray) {
+	private void handleGPIOPacket(byte[] byteArray) {
 		pin.pulse(500, true);
 
-		for(int i=0;i<byteArray.length;i++){
-		for (int j = 7; j >= 0; j--) {
-			if (isSet(byteArray[i],j)) {
+		handleGPIOFields(byteArray[0],MESSAGE_ID_SIZE);
+		System.out.print("||");
+		if(mode==1)	
+			handleGPIOFields(byteArray[1], KEYSTROKE_READ_SIZE);
+		else if(mode==2)
+			handleGPIOFields(byteArray[1], FILE_READ_SIZE);
+		
+		pin.pulse(500, true);
+		System.out.println();
+	}
+
+	/**
+	 * @param byteArray
+	 * @param i
+	 */
+	private void handleGPIOFields(byte byteData, int fieldSize) {
+		for (int j = 8*fieldSize -1; j >= 0; j--) {
+			if (isSet(byteData,j)) {
 				pin.pulse(100, true);
 				System.out.print("1");
 			} else {
@@ -122,10 +164,6 @@ class PC1Handler extends Thread {
 				}
 			}
 		}
-		System.out.print("||");
-		}
-		pin.pulse(500, true);
-		System.out.println();
 	}
 }
 
