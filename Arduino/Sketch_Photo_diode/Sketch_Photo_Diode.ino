@@ -22,6 +22,9 @@ int normalLight = 0;  //calibration for normal light value; leave at 0 for calib
 int highLight = 0;  //calibration for normal light value; leave at 0 for calibration to determine
 float midway =0;
 int calibration_time=10;
+unsigned long startTime;
+//unsigned long lastReadTime;
+int interval=100; //clock interval. milliseconds
 
 void setup()
 {
@@ -31,14 +34,14 @@ void setup()
     Serial.print("calibration starting. you have ");
     Serial.print(calibration_time);
     Serial.println(" seconds to show the photodiode an example of off and on."); //
+    startTime = millis();
 
 
     if (normalLight==0 or highLight==0){
       normalLight=9000;
-      unsigned long starttime = millis();
-      unsigned long endtime = starttime;
+      unsigned long endtime = startTime;
       int analogReading=0;
-      while ((endtime - starttime) <=calibration_time*1000) // do this loop 20 Seconds
+      while ((endtime - startTime) <=calibration_time*1000) // do this loop 20 Seconds
       {
         analogReading=analogRead(lightPin);
         if (analogReading<normalLight){ //recording the lowest value of light
@@ -68,10 +71,14 @@ void loop()
       Serial.print("0"); //Write the value of the photodiode to the serial monitor.
     else if (analogReading>midway)
       Serial.print("1"); //Write the value of the photodiode to the serial monitor.
-//    else
-//      Serial.print("???:"); //Write the value of the photodiode to the serial monitor.
-//    Serial.print(":");          
-//    Serial.println(analogReading);          
-    
-   delay(100); //short delay for faster response to light.
+
+//    Serial.print(":");          Serial.println(analogReading);          
+
+//   Serial.print("time_elapsed:"); //Write the value of the photodiode to the serial monitor.
+//   Serial.print(millis()-startTime); //Write the value of the photodiode to the serial monitor.
+//   long waitTime=interval-(millis()%interval);
+//   Serial.print(":wait_time:"); //Write the value of the photodiode to the serial monitor.
+//   Serial.println(waitTime); //Write the value of the photodiode to the serial monitor.
+   
+   delay(interval); //short delay for faster response to light.
 }
