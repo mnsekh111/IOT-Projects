@@ -15,6 +15,10 @@ import com.fazecast.jSerialComm.*;
 class PacketListener implements Runnable, SerialPortPacketListener {
 
     private IMessenger mess = null;
+    private boolean started = false;
+    private int counter = 0;
+    private char[] buffer = new char[8];
+    
     public PacketListener(IMessenger imes) {
         this.mess = imes;
     }
@@ -26,16 +30,37 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 
     @Override
     public int getPacketSize() {
-        return (SinglePacket2.frame_num_end+1)/8;
+        return 1;
     }
 
     @Override
     public void serialEvent(SerialPortEvent event) {
         byte[] newData = event.getReceivedData();
         //mess.sendMessage("\nReceived data of size: " + newData.length + "\n");
-        for (int i = 0; i < newData.length; ++i) {
-            mess.sendMessage("" + (char) newData[i]);
-        }
+            
+            if(!started)
+            {
+                if((char)newData[0] == '1')
+                    counter++;
+                if(counter == 5){
+                    started = true;
+                    counter=0;
+                }
+                
+                //mess.sendMessage("Not started " + (char) newData[0]);
+                    
+            }else{
+                buffer[counter++]=(char)newData[0]; 
+                for(int i=0;i<8;i++){
+                    mess.sendMessage(""+buffer[counter-1]);
+                }
+                
+                if(counter==8){
+                    started = false;
+                    counter=0;
+                }
+            }
+        
     }
 
     @Override
