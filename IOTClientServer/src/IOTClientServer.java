@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
@@ -15,7 +16,8 @@ import com.pi4j.io.gpio.RaspiPin;
 
 class PC1Handler extends Thread {
 	private Socket clientSocket = null;
-	private static final int READ_SIZE = 1;
+	private static final int KESTROKE_READ_SIZE = 1;
+	private static final int FILE_READ_SIZE = 16;
 	private int mode;
 	private GpioController gpio = null;
 	private GpioPinDigitalOutput pin = null;
@@ -57,13 +59,21 @@ class PC1Handler extends Thread {
 				BufferedInputStream in = new BufferedInputStream(
 						clientSocket.getInputStream());
 
-				byte[] byteArray = new byte[READ_SIZE];
+				byte[] byteArray = new byte[KESTROKE_READ_SIZE];
+				int messageId = 0;
 
 				while (in.read(byteArray) != -1) {
-					// System.out.println("Received i :99"+(char)byteArray[0]);
 					fout.write(byteArray);
 					fout.flush();
-					handleGPIO(byteArray);
+					
+					byte[] packet = constructPacket(messageId,byteArray);
+					
+					handleGPIO(packet);
+					
+					if(messageId==255)
+						messageId = 0;
+					else
+						messageId++;
 				}
 
 				gpio.shutdown();
@@ -78,6 +88,18 @@ class PC1Handler extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private byte[] constructPacket(int messageId, byte[] byteArray) {
+		//Packet = 1 byte MessageId + Data 
+		byte[] packet = new byte[1 + byteArray.length];
+		
+		packet[0] = BigInteger.valueOf(messageId).byteValue();
+		
+		for(int i=1;i<byteArray.length;i++) {
+			packet[i]= byteArray[i];
+		}
+		return packet;
 	}
 
 	/**
