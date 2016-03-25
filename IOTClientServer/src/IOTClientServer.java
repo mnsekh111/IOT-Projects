@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.BitSet;
 import java.util.Scanner;
 
 import com.pi4j.io.gpio.GpioController;
@@ -16,20 +17,18 @@ import com.pi4j.io.gpio.RaspiPin;
 
 class PC1Handler extends Thread {
 	private Socket clientSocket = null;
-	private static final int KESTROKE_READ_SIZE = 1;
+	private static final int KEYSTROKE_READ_SIZE = 1;
 	private static final int FILE_READ_SIZE = 16;
 	private int mode;
 	private GpioController gpio = null;
 	private GpioPinDigitalOutput pin = null;
-	
 
-	public PC1Handler(Socket soc,int mode) {
+	public PC1Handler(Socket soc, int mode) {
 		this.clientSocket = soc;
 		this.mode = mode;
-		 gpio = GpioFactory.getInstance();
-		 pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "MyLED",
-		 PinState.LOW);
-		 pin.setShutdownOptions(true, PinState.LOW);
+		gpio = GpioFactory.getInstance();
+		pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "MyLED", PinState.LOW);
+		pin.setShutdownOptions(true, PinState.LOW);
 
 	}
 
@@ -39,16 +38,16 @@ class PC1Handler extends Thread {
 
 	@Override
 	public void run() {
-		if(mode==1)
+		if (mode == 1)
 			handleKeystrokes();
-		else if(mode==2)
+		else if (mode == 2)
 			handleFiles();
 
 	}
 
 	private void handleFiles() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private void handleKeystrokes() {
@@ -56,21 +55,20 @@ class PC1Handler extends Thread {
 			if (clientSocket != null) {
 				File file = new File("samplefile");
 				FileOutputStream fout = new FileOutputStream(file);
-				BufferedInputStream in = new BufferedInputStream(
-						clientSocket.getInputStream());
+				BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
 
-				byte[] byteArray = new byte[KESTROKE_READ_SIZE];
+				byte[] byteArray = new byte[KEYSTROKE_READ_SIZE];
 				int messageId = 0;
 
 				while (in.read(byteArray) != -1) {
 					fout.write(byteArray);
 					fout.flush();
-					
-					byte[] packet = constructPacket(messageId,byteArray);
-					
+
+					byte[] packet = constructPacket(messageId, byteArray);
+
 					handleGPIO(packet);
-					
-					if(messageId==255)
+
+					if (messageId == 255)
 						messageId = 0;
 					else
 						messageId++;
@@ -91,14 +89,13 @@ class PC1Handler extends Thread {
 	}
 
 	private byte[] constructPacket(int messageId, byte[] byteArray) {
-		//Packet = 1 byte MessageId + Data 
+		// Packet = 1 byte MessageId + Data
 		byte[] packet = new byte[1 + byteArray.length];
-		
-		packet[0] = BigInteger.valueOf(messageId).byteValue();
-		
-		for(int i=1;i<byteArray.length;i++) {
-			packet[i]= byteArray[i];
-		}
+		byte[] byteMessageId = BigInteger.valueOf(messageId).toByteArray();
+
+		System.arraycopy(byteMessageId, 0, packet, 0, byteMessageId.length);
+		System.arraycopy(byteArray, 0, packet, byteMessageId.length, byteArray.length);
+
 		return packet;
 	}
 
@@ -109,8 +106,9 @@ class PC1Handler extends Thread {
 	private void handleGPIO(byte[] byteArray) {
 		pin.pulse(500, true);
 
-		for (int i = 0; i < 8*byteArray.length; i++) {
-			if (isSet(byteArray[0],i)) {
+		for(int i=0;i<byteArray.length;i++){
+		for (int j = 7; j >= 0; j--) {
+			if (isSet(byteArray[i],j)) {
 				pin.pulse(100, true);
 				System.out.print("1");
 			} else {
@@ -124,14 +122,18 @@ class PC1Handler extends Thread {
 				}
 			}
 		}
+		System.out.print("||");
+		}
 		pin.pulse(500, true);
+		System.out.println();
 	}
 }
 
 class PC2Handler extends Thread {
 	private Socket clientSocket = null;
 	private int mode;
-	public PC2Handler(Socket soc,int mode) {
+
+	public PC2Handler(Socket soc, int mode) {
 		this.clientSocket = soc;
 		this.mode = mode;
 	}
@@ -141,8 +143,7 @@ class PC2Handler extends Thread {
 		try {
 			if (clientSocket != null) {
 
-				BufferedInputStream in = new BufferedInputStream(
-						clientSocket.getInputStream());
+				BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
 				/*
 				 * 
 				 * 
@@ -170,7 +171,8 @@ public class IOTClientServer {
 	// System.loadLibrary("mraajava");
 	// } catch (UnsatisfiedLinkError e) {
 	// System.err
-	// .println("Native code library failed to load. See the chapter on Dynamic Linking Problems in the SWIG Java documentation for help.\n"
+	// .println("Native code library failed to load. See the chapter on Dynamic
+	// Linking Problems in the SWIG Java documentation for help.\n"
 	// + e);
 	// System.exit(1);
 	// }
@@ -181,18 +183,17 @@ public class IOTClientServer {
 		boolean runforever = true;
 		ServerSocket serverSocket = null;
 		Socket clientSocket = null;
-		
+
 		Scanner sc = new Scanner(System.in);
 		System.out.println("1. Keystroke listening \n 2. File Transfer :");
 		int mode = sc.nextInt();
 
 		try {
 			serverSocket = new ServerSocket(portNum);
-			
+
 			System.out.println("Listening on port " + portNum);
 		} catch (IOException ie) {
-			System.err.println("Error listening at port " + portNum + "\n"
-					+ ie.getLocalizedMessage());
+			System.err.println("Error listening at port " + portNum + "\n" + ie.getLocalizedMessage());
 			System.exit(1);
 		}
 
@@ -205,15 +206,15 @@ public class IOTClientServer {
 				System.exit(1);
 			}
 
-			String source = clientSocket.getInetAddress()
-					.getCanonicalHostName();
+			String source = clientSocket.getInetAddress().getCanonicalHostName();
 			System.out.println("PCI client connected to " + source);
-			if (source.contentEquals("localhost") || source.contentEquals("mns-G551JW") || source.contentEquals("vitellius")) {
+			if (source.contentEquals("localhost") || source.contentEquals("mns-G551JW")
+					|| source.contentEquals("vitellius")) {
 				PC1Handler handler = new PC1Handler(clientSocket, mode);
 				handler.start();
 
 			} else if (source.contentEquals("pc2-client")) {
-				PC2Handler handler = new PC2Handler(clientSocket,mode);
+				PC2Handler handler = new PC2Handler(clientSocket, mode);
 				handler.start();
 			}
 		}
