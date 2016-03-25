@@ -1,3 +1,4 @@
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -6,12 +7,12 @@
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
+import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.Reader;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -25,12 +26,11 @@ import java.util.logging.Logger;
 public class PC1Client {
 
 	public static void main(String[] args) {
-		//String serverHostname = new String("127.0.0.1");
-		String serverHostname = new String("192.168.43.128");
+		String serverHostname;
+		serverHostname = new String("192.168.43.128");
 		int portNum = 9991;
 
-		System.out.println("Attemping to connect to host " + serverHostname
-				+ " on port " + portNum + ".");
+		System.out.println("Attemping to connect to host " + serverHostname + " on port " + portNum + ".");
 
 		Socket socket = null;
 		BufferedOutputStream out = null;
@@ -59,27 +59,36 @@ public class PC1Client {
 			if (choice == 1) {
 
 				System.out.print("Enter Live messages : ");
-				String userInput = sc.nextLine();
-				while (!userInput.contentEquals("!q")) {
-					byte[] byteArray = userInput.getBytes();
-					out.write(byteArray, 0, byteArray.length);
+				String[] cmd = { "/bin/sh", "-c", "stty raw </dev/tty" };
+				Runtime.getRuntime().exec(cmd).waitFor();
+				Console console = System.console();
+				Reader reader = console.reader();
+
+				while (true) {
+					int inputAscii = reader.read();
+
+					if (String.valueOf(inputAscii).equalsIgnoreCase("9"))
+						break;
+					
+					byte[] byteArray = BigInteger.valueOf(inputAscii).toByteArray();
+
+					out.write(byteArray, 0, byteArray.length); 
 					out.flush();
-					//System.out.print("Done");
-					userInput = sc.nextLine();
-				}
 
-				System.out
-						.println("Message sent successfully to Rasberry pi \n");
+					System.out.println("input Ascii - " + inputAscii);
+					for(byte b:byteArray)
+						System.out.println("bytes - "+b);
+
+				}
+				cmd = new String[] { "/bin/sh", "-c", "stty sane </dev/tty" };
+				Runtime.getRuntime().exec(cmd).waitFor();
 			} else if (choice == 2) {
-				File file = new File("samplefile");
+				System.out.println("Enter the name of the file :");
+				Scanner scanner = new Scanner(System.in);
+				String fileName = scanner.nextLine();
 
-				if (!file.exists()) {
-					file.createNewFile();
-					/* Write some dummy data into the file */
-
-					/* Finish */
-				}
-
+				File file = new File(fileName);
+				
 				byte[] byteArray = new byte[(int) file.length()];
 				FileInputStream fis = new FileInputStream(file);
 				BufferedInputStream bis = new BufferedInputStream(fis);
@@ -91,8 +100,8 @@ public class PC1Client {
 				bis.close();
 
 			}
-		} catch (IOException e) {
-			System.out.println("Read / Write exception\n");
+		} catch (Exception e) {
+			System.out.println("Read / Write exception\n" + e.getMessage());
 		}
 
 		try {
@@ -101,8 +110,8 @@ public class PC1Client {
 			in.close();
 			socket.close();
 		} catch (IOException ex) {
-			Logger.getLogger(PC1Client.class.getName()).log(Level.SEVERE, null,
-					ex);
+			Logger.getLogger(PC1Client.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
+
 }
