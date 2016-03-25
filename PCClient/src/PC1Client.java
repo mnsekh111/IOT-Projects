@@ -26,8 +26,11 @@ import java.util.logging.Logger;
 public class PC1Client {
 
 	public static void main(String[] args) {
-		// String serverHostname = new String("127.0.0.1");
-		String serverHostname = new String("192.168.43.128");
+		String serverHostname;
+		if(args[0].equalsIgnoreCase("debug"))
+			serverHostname = new String("127.0.0.1");
+		else 
+			serverHostname = new String("192.168.43.128");
 		int portNum = 9991;
 
 		System.out.println("Attemping to connect to host " + serverHostname + " on port " + portNum + ".");
