@@ -5,9 +5,13 @@
  */
 package iot;
 
+import org.omg.CORBA.DATA_CONVERSION;
+
+import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortEvent;
+import com.fazecast.jSerialComm.SerialPortPacketListener;
+
 import packetizer.SinglePacket2;
-import com.fazecast.jSerialComm.*;
-import java.util.ArrayList;
 
 /**
  *
@@ -19,6 +23,10 @@ class PacketListener implements Runnable, SerialPortPacketListener {
     private boolean started = false;
     private int counter = 0;
     private String customBuffer = "";
+    private static final int KEYSTROKE_BITS = 8;
+    private static final int FILE_BITS = 128;
+    private static final int KEYSTROKE_PACKET_LENGTH = 32;
+    private static final int FILE_PACKET_LENGTH = 152;
     
     public PacketListener(IMessenger imes) {
         this.mess = imes;
@@ -56,22 +64,44 @@ class PacketListener implements Runnable, SerialPortPacketListener {
             customBuffer+=((char)newData[0]);
             System.out.println(customBuffer.length());
             
-            //Message id received
-            if(customBuffer.length() == 8){         
-                //mess.sendMessage(""+(char)Integer.parseInt(customBuffer.substring(0,8),2));
-            }
-            
-            //Message payload received
-            else if(customBuffer.length() == 16){
-                mess.sendMessage(""+(char)Integer.parseInt(customBuffer.substring(8,16),2) + " "+customBuffer.substring(8,16)+"\n");
-                started = false;
+            if(customBuffer.length() == KEYSTROKE_PACKET_LENGTH) {
+            	
+            	int messageId = Integer.parseInt(customBuffer.substring(0,8),2);
+            	String data = ""+(char)Integer.parseInt(customBuffer.substring(8,8+KEYSTROKE_BITS),2);
+            	String actualChecksum = customBuffer.substring(8+KEYSTROKE_BITS,32);
+            	
+            	
+            	if(validChecksum(data,actualChecksum)) {
+                	mess.sendMessage("\nData - "+data);
+            	}
+            	
+            	started = false;
                 customBuffer="";
             }
+            
             
         }
         
     }
 
+	private boolean validChecksum(String data,String actualChecksum) {
+		String calculatedChecksum = new String();
+		byte[] checksum = CheckSum.checkSum16(data.getBytes());
+		
+		for(int i=1;i>=0;i--)
+			for(int j=0;j<8;j++){
+				if(isSet(checksum[i], j))
+					calculatedChecksum = "1" + calculatedChecksum;
+				else
+					calculatedChecksum = "0" + calculatedChecksum;
+			}
+		return calculatedChecksum.equals(actualChecksum);
+	}
+    
+    private boolean isSet(byte value, int bit) {
+		return (value & (1 << bit)) != 0;
+	}
+    
     @Override
     public void run() {
 

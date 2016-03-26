@@ -128,14 +128,11 @@ class PC1Handler extends Thread {
 		byte[] byteMessageId = BigInteger.valueOf(messageId).toByteArray();
 		byte[] checksum = c.checkSum16(data);
 		
-		System.out.println("Checksum size  - "+checksum.length);
 		System.out.println("Checksum - "+new BigInteger(checksum).intValue());
 		
 		System.arraycopy(byteMessageId, 0, packet, 0, byteMessageId.length);
 		System.arraycopy(data, 0, packet, byteMessageId.length, data.length);
 		System.arraycopy(checksum, 0, packet, byteMessageId.length + data.length, checksum.length);
-		
-		System.out.println("Packet is - "+new String(packet));
 		
 		return packet;
 	}
