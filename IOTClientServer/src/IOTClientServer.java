@@ -107,25 +107,29 @@ public class IOTClientServer {
 
 					byte[] byteArray = new byte[FILE_READ_SIZE];
 					int messageId = 0;
-					int nexMessageId = 0;
+					int nextMessageId = 0;
 					while (in.read(byteArray) != -1) {
+						while (true) {
+							byte[] packet = constructPacket(messageId, byteArray);
+							handleGPIOPacket(packet);
 
-						byte[] packet = constructPacket(messageId, byteArray);
-						handleGPIOPacket(packet);
+							nextMessageId = checkAckReceived(messageId);
 
-						nexMessageId = checkAckReceived(messageId);
+							if (messageId == nextMessageId)
+								// Keep executing till ack for this message is
+								// received
+								continue;
+							else if (nextMessageId == messageId + 1) {
+								// Increment message id and exit
+								messageId = nextMessageId;
+								break;
+							}
 
-						if (messageId == nexMessageId)
-							continue;
-						else if (nexMessageId == messageId + 1)
-							messageId = nexMessageId;
-
-						if (messageId == 255)
-							messageId = 0;
+							if (messageId == 255)
+								messageId = 0;
+						}
 					}
-
 				}
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -172,23 +176,29 @@ public class IOTClientServer {
 
 					byte[] byteArray = new byte[KEYSTROKE_READ_SIZE];
 					int messageId = 0;
-					int nexMessageId=0;
-					
+					int nextMessageId = 0;
+
 					while (in.read(byteArray) != -1) {
+						while (true) {
+							byte[] packet = constructPacket(messageId, byteArray);
 
-						byte[] packet = constructPacket(messageId, byteArray);
+							handleGPIOPacket(packet);
 
-						handleGPIOPacket(packet);
+							nextMessageId = checkAckReceived(messageId);
 
-						nexMessageId = checkAckReceived(messageId);
+							if (messageId == nextMessageId)
+								// Keep executing till ack for this message is
+								// received
+								continue;
+							else if (nextMessageId == messageId + 1) {
+								// Increment message id and exit
+								messageId = nextMessageId;
+								break;
+							}
 
-						if (messageId == nexMessageId)
-							continue;
-						else if (nexMessageId == messageId + 1)
-							messageId = nexMessageId;
-						
-						if (messageId == 255)
-							messageId = 0;
+							if (messageId == 255)
+								messageId = 0;
+						}
 					}
 
 					gpio.shutdown();
