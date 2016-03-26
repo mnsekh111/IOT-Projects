@@ -22,12 +22,12 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 
 	private IMessenger mess = null;
 	private boolean started = false;
-	private int counter = 0;
 	private String customBuffer = "";
 	private static final int KEYSTROKE_BITS = 8;
 	private static final int FILE_BITS = 128;
 	private static final int KEYSTROKE_PACKET_LENGTH = 32;
 	private static final int FILE_PACKET_LENGTH = 152;
+	private static int lastSuccessMsgId = 0;
 
 	public PacketListener(IMessenger imes) {
 		this.mess = imes;
@@ -46,11 +46,8 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 	@Override
 	public void serialEvent(SerialPortEvent event) {
 		byte[] newData = event.getReceivedData();
-		// mess.sendMessage("\nReceived data of size: " + newData.length +
-		// "\n");
-
-		// Arduino is just sending 0's. Actual data transmission not started
-		// mess.sendMessage(""+(char)newData[0]);
+		
+		
 		if (started == false) {
 			if ((char) newData[0] == '1') {
 				customBuffer += "1";
@@ -73,10 +70,11 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 				String actualChecksum = customBuffer.substring(8 + KEYSTROKE_BITS, 32);
 
 				if (validChecksum(data, actualChecksum)) {
+					lastSuccessMsgId = messageId;
 					mess.sendMessage("\nData - " + data);
-					sendAck(messageId, true);
+					sendAck(lastSuccessMsgId, true);
 				} else {
-					sendAck(messageId, false);
+					sendAck(lastSuccessMsgId, false);
 				}
 
 				started = false;
@@ -95,7 +93,8 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 			messageId++;
 			
 		try {
-			socket = new Socket("192.168.0.128", 9000);
+			System.out.println("Sending ACK - "+success+" - "+messageId);
+			socket = new Socket("192.168.43.128", 9000);
 			dos = new DataOutputStream(socket.getOutputStream());
 			
 			dos.writeInt(messageId);
