@@ -32,7 +32,7 @@ public class IOTClientServer {
 		try {
 			serverSocket = new ServerSocket(portNum);
 			ackSocket = new ServerSocket(9000);
-			
+
 			System.out.println("Listening Clients on port " + portNum);
 			System.out.println("Listening ACKS on port " + 9000);
 		} catch (IOException ie) {
@@ -51,8 +51,8 @@ public class IOTClientServer {
 
 			String source = clientSocket.getInetAddress().getCanonicalHostName();
 			System.out.println("PCI client connected to " + source);
-				IOTClientServer.PC1Handler handler = iotClientServer.new PC1Handler(clientSocket, ackSocket, mode);
-				handler.start();
+			IOTClientServer.PC1Handler handler = iotClientServer.new PC1Handler(clientSocket, ackSocket, mode);
+			handler.start();
 		}
 
 		try {
@@ -107,13 +107,18 @@ public class IOTClientServer {
 
 					byte[] byteArray = new byte[FILE_READ_SIZE];
 					int messageId = 0;
-
+					int nexMessageId = 0;
 					while (in.read(byteArray) != -1) {
 
 						byte[] packet = constructPacket(messageId, byteArray);
 						handleGPIOPacket(packet);
-						
-						messageId = checkAckReceived(messageId);
+
+						nexMessageId = checkAckReceived(messageId);
+
+						if (messageId == nexMessageId)
+							continue;
+						else if (nexMessageId == messageId + 1)
+							messageId = nexMessageId;
 
 						if (messageId == 255)
 							messageId = 0;
@@ -128,10 +133,10 @@ public class IOTClientServer {
 		}
 
 		private int checkAckReceived(int messageId) {
-			
+
 			Socket clientAckSocket = null;
 			DataInputStream dis = null;
-			int nextMessageId=-1;
+			int nextMessageId = -1;
 			// Open socket
 			try {
 				// Listen for ack
@@ -141,16 +146,15 @@ public class IOTClientServer {
 					} catch (IOException e) {
 						System.err.println("Accept failed.");
 					}
-					
+
 					if (clientAckSocket != null) {
 						dis = new DataInputStream(clientAckSocket.getInputStream());
 						nextMessageId = dis.readInt();
-						System.out.println("Successfully received Next Message ID : "+nextMessageId);
+						System.out.println("Successfully received Next Message ID : " + nextMessageId);
 						break;
 					}
 
 				}
-
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -168,15 +172,21 @@ public class IOTClientServer {
 
 					byte[] byteArray = new byte[KEYSTROKE_READ_SIZE];
 					int messageId = 0;
-
+					int nexMessageId=0;
+					
 					while (in.read(byteArray) != -1) {
 
 						byte[] packet = constructPacket(messageId, byteArray);
 
 						handleGPIOPacket(packet);
-						
-						messageId = checkAckReceived(messageId);
 
+						nexMessageId = checkAckReceived(messageId);
+
+						if (messageId == nexMessageId)
+							continue;
+						else if (nexMessageId == messageId + 1)
+							messageId = nexMessageId;
+						
 						if (messageId == 255)
 							messageId = 0;
 					}
