@@ -115,7 +115,8 @@ public class IOTClientServer {
 
 						byte[] packet = constructPacket(messageId, byteArray);
 						handleGPIOPacket(packet);
-
+						System.out.println("GPIO Packet Sent. Onto ACKS now");
+						
 						messageId = checkAckReceived(messageId);
 
 						if (messageId == 255)
@@ -131,7 +132,7 @@ public class IOTClientServer {
 		}
 
 		private int checkAckReceived(int messageId) {
-
+			System.out.println("Inside check ack message");
 			ServerSocket ackSocket = null;
 			Socket clientAckSocket = null;
 			DataInputStream dis = null;
@@ -206,8 +207,6 @@ public class IOTClientServer {
 			byte[] byteMessageId = BigInteger.valueOf(messageId).toByteArray();
 			byte[] checksum = CheckSum.checkSum16(data);
 
-			System.out.println("Checksum - " + new BigInteger(checksum).intValue());
-
 			System.arraycopy(byteMessageId, 0, packet, 0, byteMessageId.length);
 			System.arraycopy(data, 0, packet, byteMessageId.length, data.length);
 			System.arraycopy(checksum, 0, packet, byteMessageId.length + data.length, checksum.length);
@@ -281,37 +280,4 @@ public class IOTClientServer {
 		}
 	}
 
-	/*class PC2Handler extends Thread {
-		private Socket clientSocket = null;
-		private int mode;
-
-		public PC2Handler(Socket soc, int mode) {
-			this.clientSocket = soc;
-			this.mode = mode;
-		}
-
-		@Override
-		public void run() {
-			try {
-				if (clientSocket != null) {
-
-					BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
-					
-					 * 
-					 * 
-					 * 
-					 * 
-					 * ACK parsing from PC2 goes here
-					 
-
-				}
-
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		}
-	}
-*/
 }
