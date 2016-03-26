@@ -28,8 +28,8 @@ public class PC1Client {
 	public static void main(String[] args) {
 		System.out.println("PC Client started");
 		String serverHostname;
-		//serverHostname = new String("192.168.43.128");
-		serverHostname = new String("127.0.0.1");
+		serverHostname = new String("192.168.43.128");
+		//serverHostname = new String("127.0.0.1");
 		int portNum = 9991;
 
 		System.out.println("Attemping to connect to host " + serverHostname + " on port " + portNum + ".");
