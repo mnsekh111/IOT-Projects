@@ -136,7 +136,6 @@ public class IOTClientServer {
 			try {
 				// Listen for ack
 				while (true) {
-					System.out.println("Waiting for Client ACK sockets");
 					try {
 						clientAckSocket = ackSocket.accept();
 					} catch (IOException e) {
@@ -146,6 +145,7 @@ public class IOTClientServer {
 					if (clientAckSocket != null) {
 						dis = new DataInputStream(clientAckSocket.getInputStream());
 						nextMessageId = dis.readInt();
+						System.out.println("Successfully received Next Message ID : "+nextMessageId);
 						break;
 					}
 
