@@ -29,7 +29,7 @@ public class PC1Client {
 			os.write(mybytearray, 0, mybytearray.length);
 			os.flush();
 			System.out.println("Done.");
-
+			scanner.close();
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		} finally {
@@ -39,6 +39,7 @@ public class PC1Client {
 				os.close();
 			if (socket != null)
 				socket.close();
+			
 		}
 
 	}

@@ -48,19 +48,21 @@ public class IOTClientServer {
 
 			String source = clientSocket.getInetAddress().getCanonicalHostName();
 			System.out.println("PCI client connected to " + source);
-			if (source.contentEquals("localhost") || source.contentEquals("mns-G551JW")
-					|| source.contentEquals("vitellius")) {
+			//if (source.contentEquals("localhost") || source.contentEquals("mns-G551JW")
+		//			|| source.contentEquals("vitellius")) {
 				IOTClientServer.PC1Handler handler = iotClientServer.new PC1Handler(clientSocket, mode);
 				handler.start();
 
-			} else if (source.contentEquals("pc2-client")) {
+		//	} 
+			/*else if (source.contentEquals("pc2-client")) {
 				IOTClientServer.PC2Handler handler = iotClientServer.new PC2Handler(clientSocket, mode);
 				handler.start();
-			}
+			}*/
 		}
 
 		try {
 			serverSocket.close();
+			sc.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -104,8 +106,6 @@ public class IOTClientServer {
 		private void handleFiles() {
 			try {
 				if (clientSocket != null) {
-					File file = new File("samplefile");
-					FileOutputStream fout = new FileOutputStream(file);
 					BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
 
 					byte[] byteArray = new byte[FILE_READ_SIZE];
@@ -200,12 +200,11 @@ public class IOTClientServer {
 		}
 
 		private byte[] constructPacket(int messageId, byte[] data) {
-			CheckSum c = new CheckSum();
 
 			// Packet = 1 byte MessageId + Data
 			byte[] packet = new byte[MESSAGE_ID_SIZE + data.length + CHECKSUM_SIZE];
 			byte[] byteMessageId = BigInteger.valueOf(messageId).toByteArray();
-			byte[] checksum = c.checkSum16(data);
+			byte[] checksum = CheckSum.checkSum16(data);
 
 			System.out.println("Checksum - " + new BigInteger(checksum).intValue());
 
@@ -282,7 +281,7 @@ public class IOTClientServer {
 		}
 	}
 
-	class PC2Handler extends Thread {
+	/*class PC2Handler extends Thread {
 		private Socket clientSocket = null;
 		private int mode;
 
@@ -297,13 +296,13 @@ public class IOTClientServer {
 				if (clientSocket != null) {
 
 					BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
-					/*
+					
 					 * 
 					 * 
 					 * 
 					 * 
 					 * ACK parsing from PC2 goes here
-					 */
+					 
 
 				}
 
@@ -314,5 +313,5 @@ public class IOTClientServer {
 
 		}
 	}
-
+*/
 }
