@@ -61,7 +61,7 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 		} else { // PC2 has detected the start of the packet
 
 			customBuffer += ((char) newData[0]);
-			System.out.println(customBuffer.length());
+			//System.out.println(customBuffer.length());
 
 			if (customBuffer.length() == KEYSTROKE_PACKET_LENGTH) {
 
@@ -89,7 +89,6 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 		Socket socket = null;
 		DataOutputStream dos = null;
 		
-		if (success) 
 			messageId++;
 			
 		try {

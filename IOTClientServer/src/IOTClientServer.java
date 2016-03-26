@@ -106,26 +106,22 @@ public class IOTClientServer {
 
 					byte[] byteArray = new byte[FILE_READ_SIZE];
 					int messageId = 0;
-					int nextMessageId = 0;
 					while (in.read(byteArray) != -1) {
 						while (true) {
 							byte[] packet = constructPacket(messageId, byteArray);
 							handleGPIOPacket(packet);
 
-							nextMessageId = checkAckReceived(messageId);
-
-							if (messageId == nextMessageId)
-								// Keep executing till ack for this message is
-								// received
-								continue;
-							else if (nextMessageId == messageId + 1) {
-								// Increment message id and exit
-								messageId = nextMessageId;
+							if (checkAckReceived(messageId)) {
+								
+								messageId++;
+								
+								if (messageId == 127)
+									messageId = 0;
+								
 								break;
+							} else {
+								continue;
 							}
-
-							if (messageId == 255)
-								messageId = 0;
 						}
 					}
 				}
@@ -135,7 +131,7 @@ public class IOTClientServer {
 
 		}
 
-		private int checkAckReceived(int messageId) {
+		private boolean checkAckReceived(int messageId) {
 
 			Socket clientAckSocket = null;
 			DataInputStream dis = null;
@@ -154,28 +150,29 @@ public class IOTClientServer {
 						dis = new DataInputStream(clientAckSocket.getInputStream());
 						nextMessageId = dis.readInt();
 						System.out.println("Successfully received Next Message ID : " + nextMessageId);
-						break;
+
+						if (nextMessageId == messageId + 1)
+							return true;
+						else
+							return false;
 					}
 
 				}
 
 			} catch (Exception e) {
 				e.printStackTrace();
+				return false;
 			}
 
-			return nextMessageId;
 		}
 
 		private void handleKeystrokes() {
 			try {
 				if (clientSocket != null) {
-					File file = new File("samplefile");
-					FileOutputStream fout = new FileOutputStream(file);
 					BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
 
 					byte[] byteArray = new byte[KEYSTROKE_READ_SIZE];
 					int messageId = 0;
-					int nextMessageId = 0;
 
 					while (in.read(byteArray) != -1) {
 						while (true) {
@@ -183,26 +180,24 @@ public class IOTClientServer {
 
 							handleGPIOPacket(packet);
 
-							nextMessageId = checkAckReceived(messageId);
-
-							if (messageId == nextMessageId)
-								// Keep executing till ack for this message is
-								// received
-								continue;
-							else if (nextMessageId == messageId + 1) {
-								// Increment message id and exit
-								messageId = nextMessageId;
+							if (checkAckReceived(messageId)) {
+								
+								messageId++;
+								
+								if (messageId == 127)
+									messageId = 0;
+								
 								break;
+							} else {
+								continue;
 							}
 
-							if (messageId == 255)
-								messageId = 0;
+
 						}
 					}
 
 					gpio.shutdown();
 					in.close();
-					fout.close();
 					clientSocket.close();
 				}
 			} catch (FileNotFoundException e) {
