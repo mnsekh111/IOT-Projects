@@ -7,6 +7,7 @@ package iot;
 
 import packetizer.SinglePacket2;
 import com.fazecast.jSerialComm.*;
+import java.util.ArrayList;
 
 /**
  *
@@ -17,7 +18,7 @@ class PacketListener implements Runnable, SerialPortPacketListener {
     private IMessenger mess = null;
     private boolean started = false;
     private int counter = 0;
-    private char[] buffer = new char[8];
+    private String customBuffer = "";
     
     public PacketListener(IMessenger imes) {
         this.mess = imes;
@@ -37,29 +38,37 @@ class PacketListener implements Runnable, SerialPortPacketListener {
     public void serialEvent(SerialPortEvent event) {
         byte[] newData = event.getReceivedData();
         //mess.sendMessage("\nReceived data of size: " + newData.length + "\n");
-            
-            if(!started)
-            {
-                if((char)newData[0] == '1')
-                    counter++;
-                if(counter == 5){
-                    started = true;
-                    counter=0;
-                }
-                
-                //mess.sendMessage("Not started " + (char) newData[0]);
-                    
-            }else{
-                buffer[counter++]=(char)newData[0]; 
-                for(int i=0;i<8;i++){
-                    mess.sendMessage(""+buffer[counter-1]);
-                }
-                
-                if(counter==8){
-                    started = false;
-                    counter=0;
-                }
+           
+        //Arduino is just sending 0's. Actual data transmission not started
+        //mess.sendMessage(""+(char)newData[0]);
+        if(started == false){
+            if((char)newData[0] == '1'){
+                customBuffer+="1";
+            }else if((char)newData[0]=='0'){
+                customBuffer="";
             }
+            if(customBuffer.length() == 5){
+                customBuffer="";
+                started = true;
+            }
+        }else{  //PC2 has detected the start of the packet
+            
+            customBuffer+=((char)newData[0]);
+            System.out.println(customBuffer.length());
+            
+            //Message id received
+            if(customBuffer.length() == 8){         
+                //mess.sendMessage(""+(char)Integer.parseInt(customBuffer.substring(0,8),2));
+            }
+            
+            //Message payload received
+            else if(customBuffer.length() == 16){
+                mess.sendMessage(""+(char)Integer.parseInt(customBuffer.substring(8,16),2) + " "+customBuffer.substring(8,16)+"\n");
+                started = false;
+                customBuffer="";
+            }
+            
+        }
         
     }
 
@@ -95,9 +104,9 @@ public class ArdSerial {
             comPort.openPort();
             comPort.addDataListener(listener);
              mess.sendMessage("\nThe port is opened successfully ! \n");
+             SinglePacket2.initSinglePacket(0, 0, 0, 7, 7, 7);
         }else{
             mess.sendMessage("\nThe port is already open \n");
-            SinglePacket2.initSinglePacket(0, 0, 0, 7, 7, 7);
         }
     }
 
