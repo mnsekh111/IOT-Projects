@@ -1,4 +1,5 @@
 import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,7 +14,6 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
-
 
 public class IOTClientServer {
 
@@ -66,7 +66,7 @@ public class IOTClientServer {
 			e.printStackTrace();
 		}
 	}
-	
+
 	class PC1Handler extends Thread {
 		private Socket clientSocket = null;
 		private static final int KEYSTROKE_READ_SIZE = 1;
@@ -107,36 +107,62 @@ public class IOTClientServer {
 					File file = new File("samplefile");
 					FileOutputStream fout = new FileOutputStream(file);
 					BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
-					
+
 					byte[] byteArray = new byte[FILE_READ_SIZE];
 					int messageId = 0;
-					
+
 					while (in.read(byteArray) != -1) {
-						
+
 						byte[] packet = constructPacket(messageId, byteArray);
 						handleGPIOPacket(packet);
-						/*
-						 * 
-						 * Handle ACKS here.
-						 * 
-						 * If ACK success, receive ACK ID = MsgID + 1,
-						 *   go next
-						 * else receive ACK ID = MsgID.
-						 *   go back to start and retransmit this packet  
-						 */
+
+						messageId = checkAckReceived(messageId);
 
 						if (messageId == 255)
 							messageId = 0;
-						else
-							messageId++;
 					}
-					
+
 				}
-				
-			}catch(Exception e) {
+
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
+		}
+
+		private int checkAckReceived(int messageId) {
+
+			ServerSocket ackSocket = null;
+			Socket clientAckSocket = null;
+			DataInputStream dis = null;
+			int nextMessageId=-1;
+			// Open socket
+			try {
+				ackSocket = new ServerSocket(9000);
+				System.out.println("Listening ACKS on port " + 9000);
+
+				// Listen for ack
+				while (true) {
+					System.out.println("Waiting for Client ACK sockets");
+					clientAckSocket = ackSocket.accept();
+					
+					
+					if (clientAckSocket != null) {
+						dis = new DataInputStream(clientAckSocket.getInputStream());
+						nextMessageId = dis.readInt();
+						break;
+					}
+
+				}
+
+				// Close Socket
+				ackSocket.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			return nextMessageId;
 		}
 
 		private void handleKeystrokes() {
@@ -154,7 +180,7 @@ public class IOTClientServer {
 						byte[] packet = constructPacket(messageId, byteArray);
 
 						handleGPIOPacket(packet);
-						
+
 						if (messageId == 255)
 							messageId = 0;
 						else
@@ -175,50 +201,50 @@ public class IOTClientServer {
 
 		private byte[] constructPacket(int messageId, byte[] data) {
 			CheckSum c = new CheckSum();
-			
+
 			// Packet = 1 byte MessageId + Data
 			byte[] packet = new byte[MESSAGE_ID_SIZE + data.length + CHECKSUM_SIZE];
 			byte[] byteMessageId = BigInteger.valueOf(messageId).toByteArray();
 			byte[] checksum = c.checkSum16(data);
-			
-			System.out.println("Checksum - "+new BigInteger(checksum).intValue());
-			
+
+			System.out.println("Checksum - " + new BigInteger(checksum).intValue());
+
 			System.arraycopy(byteMessageId, 0, packet, 0, byteMessageId.length);
 			System.arraycopy(data, 0, packet, byteMessageId.length, data.length);
 			System.arraycopy(checksum, 0, packet, byteMessageId.length + data.length, checksum.length);
-			
+
 			return packet;
 		}
 
-
 		/**
-		 * This method will accept bytes, construct packet to be sent and handle GPIO accordingly
+		 * This method will accept bytes, construct packet to be sent and handle
+		 * GPIO accordingly
+		 * 
 		 * @param byteArray
 		 */
 		private void handleGPIOPacket(byte[] byteArray) {
-			
+
 			pin.pulse(PADDING_TIME, true);
-			
-			//Transmit MessageID
+
+			// Transmit MessageID
 			handleGPIOFields(byteArray[0]);
-			//System.out.print("||");
-			//Transmit Data
-			if(mode==1) {	
+			// System.out.print("||");
+			// Transmit Data
+			if (mode == 1) {
 				handleGPIOFields(byteArray[1]);
-				//Transmit Checksum
+				// Transmit Checksum
 				handleGPIOFields(byteArray[2]);
 				handleGPIOFields(byteArray[3]);
-			}
-			else if(mode==2) {
-				int i=1;
-				for(i = 1;i<=FILE_READ_SIZE;i++) {
+			} else if (mode == 2) {
+				int i = 1;
+				for (i = 1; i <= FILE_READ_SIZE; i++) {
 					handleGPIOFields(byteArray[i]);
 				}
-			//System.out.println();
+				// System.out.println();
 				handleGPIOFields(byteArray[i]);
-				handleGPIOFields(byteArray[i+1]);
+				handleGPIOFields(byteArray[i + 1]);
 			}
-			
+
 		}
 
 		/**
@@ -226,18 +252,18 @@ public class IOTClientServer {
 		 * @param i
 		 */
 		private void handleGPIOFields(byte byteData) {
-			long lastTime= System.currentTimeMillis();
-			
-			
+			long lastTime = System.currentTimeMillis();
+
 			for (int j = 7; j >= 0; j--) {
-				 
-				//System.out.println("Current time - "+System.currentTimeMillis()%10000);
-				if (isSet(byteData,j)) {
+
+				// System.out.println("Current time -
+				// "+System.currentTimeMillis()%10000);
+				if (isSet(byteData, j)) {
 					System.out.print("1");
-					//pin.pulse(BIT_TIME, true);
+					// pin.pulse(BIT_TIME, true);
 					pin.high();
 					try {
-						Thread.sleep( BIT_TIME - (System.currentTimeMillis()-lastTime));
+						Thread.sleep(BIT_TIME - (System.currentTimeMillis() - lastTime));
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -246,7 +272,7 @@ public class IOTClientServer {
 					System.out.print("0");
 					pin.low();
 					try {
-						Thread.sleep( BIT_TIME - (System.currentTimeMillis()-lastTime));
+						Thread.sleep(BIT_TIME - (System.currentTimeMillis() - lastTime));
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
