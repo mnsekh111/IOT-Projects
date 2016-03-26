@@ -84,7 +84,7 @@ public class IOTClientServer {
 			gpio = GpioFactory.getInstance();
 			pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "MyLED", PinState.LOW);
 			pin.setShutdownOptions(true, PinState.LOW);
-
+			this.ackSocket = ackSocket;
 		}
 
 		private boolean isSet(byte value, int bit) {
@@ -137,8 +137,11 @@ public class IOTClientServer {
 				// Listen for ack
 				while (true) {
 					System.out.println("Waiting for Client ACK sockets");
-					clientAckSocket = ackSocket.accept();
-					
+					try {
+						clientAckSocket = ackSocket.accept();
+					} catch (IOException e) {
+						System.err.println("Accept failed.");
+					}
 					
 					if (clientAckSocket != null) {
 						dis = new DataInputStream(clientAckSocket.getInputStream());
