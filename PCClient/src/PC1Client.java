@@ -26,8 +26,10 @@ import java.util.logging.Logger;
 public class PC1Client {
 
 	public static void main(String[] args) {
+		System.out.println("PC Client started");
 		String serverHostname;
-		serverHostname = new String("192.168.43.128");
+		//serverHostname = new String("192.168.43.128");
+		serverHostname = new String("127.0.0.1");
 		int portNum = 9991;
 
 		System.out.println("Attemping to connect to host " + serverHostname + " on port " + portNum + ".");
@@ -85,8 +87,9 @@ public class PC1Client {
 			} else if (choice == 2) {
 				System.out.println("Enter the name of the file :");
 				Scanner scanner = new Scanner(System.in);
-				String fileName = scanner.nextLine();
-
+				//String fileName = scanner.nextLine();
+				String fileName = "/tmp/test";
+				
 				File file = new File(fileName);
 				
 				byte[] byteArray = new byte[(int) file.length()];

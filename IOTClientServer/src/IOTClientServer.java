@@ -9,16 +9,16 @@ import java.net.Socket;
 import java.util.Scanner;
 
 import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;
 
 class PC1Handler extends Thread {
 	private Socket clientSocket = null;
 	private static final int KEYSTROKE_READ_SIZE = 1;
 	private static final int FILE_READ_SIZE = 16;
 	private static final int MESSAGE_ID_SIZE = 1;
+	private static final int PADDING_TIME = 500;
+	private static final int BIT_TIME = 100;
+	private static final int CHECKSUM_SIZE = 2;
 	private int mode;
 	private GpioController gpio = null;
 	private GpioPinDigitalOutput pin = null;
@@ -26,10 +26,10 @@ class PC1Handler extends Thread {
 	public PC1Handler(Socket soc, int mode) {
 		this.clientSocket = soc;
 		this.mode = mode;
-		gpio = GpioFactory.getInstance();
+		/*gpio = GpioFactory.getInstance();
 		pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "MyLED", PinState.LOW);
 		pin.setShutdownOptions(true, PinState.LOW);
-
+*/
 	}
 
 	private boolean isSet(byte value, int bit) {
@@ -58,10 +58,21 @@ class PC1Handler extends Thread {
 				while (in.read(byteArray) != -1) {
 					fout.write(byteArray);
 					fout.flush();
-
+					
+					
+					//System.out.println("Byte Array is "+new String(byteArray));
+					
 					byte[] packet = constructPacket(messageId, byteArray);
-
 					handleGPIOPacket(packet);
+					/*
+					 * 
+					 * Handle ACKS here.
+					 * 
+					 * If ACK success, receive ACK ID = MsgID + 1,
+					 *   go next
+					 * else receive ACK ID = MsgID.
+					 *   go back to start and retransmit this packet  
+					 */
 
 					if (messageId == 255)
 						messageId = 0;
@@ -92,9 +103,10 @@ class PC1Handler extends Thread {
 					fout.flush();
 
 					byte[] packet = constructPacket(messageId, byteArray);
-
+					
+					
 					handleGPIOPacket(packet);
-
+					
 					if (messageId == 255)
 						messageId = 0;
 					else
@@ -115,16 +127,24 @@ class PC1Handler extends Thread {
 		}
 	}
 
-	private byte[] constructPacket(int messageId, byte[] byteArray) {
+	private byte[] constructPacket(int messageId, byte[] data) {
+		CheckSum c = new CheckSum();
+		
 		// Packet = 1 byte MessageId + Data
-		byte[] packet = new byte[1 + byteArray.length];
+		byte[] packet = new byte[1 + data.length];
 		byte[] byteMessageId = BigInteger.valueOf(messageId).toByteArray();
-
+		byte[] checksum = c.checkSum16(data);
+		
+		System.out.println("Checksum size  - "+checksum.length);
+		System.out.println("Checksum - "+new BigInteger(checksum).intValue());
+		
 		System.arraycopy(byteMessageId, 0, packet, 0, byteMessageId.length);
-		System.arraycopy(byteArray, 0, packet, byteMessageId.length, byteArray.length);
-
+		System.arraycopy(data, 0, packet, byteMessageId.length, data.length);
+		System.arraycopy(checksum, 0, packet, byteMessageId.length + data.length, checksum.length);
+		
 		return packet;
 	}
+
 
 	/**
 	 * This method will accept bytes, construct packet to be sent and handle GPIO accordingly
@@ -133,14 +153,17 @@ class PC1Handler extends Thread {
 	private void handleGPIOPacket(byte[] byteArray) {
 		pin.pulse(500, true);
 
-		handleGPIOFields(byteArray[0],MESSAGE_ID_SIZE);
+		handleGPIOFields(byteArray[0]);
 		System.out.print("||");
 		if(mode==1)	
-			handleGPIOFields(byteArray[1], KEYSTROKE_READ_SIZE);
+			handleGPIOFields(byteArray[1]);
 		else if(mode==2)
-			handleGPIOFields(byteArray[1], FILE_READ_SIZE);
+			for(int i = 1;i<=FILE_READ_SIZE;i++) {
+		//		System.out.println("Current byte - "+Character.toString ((char) byteArray[i]));
+				handleGPIOFields(byteArray[i]);
+				
+			}
 		
-		pin.pulse(500, true);
 		System.out.println();
 	}
 
@@ -148,14 +171,14 @@ class PC1Handler extends Thread {
 	 * @param byteArray
 	 * @param i
 	 */
-	private void handleGPIOFields(byte byteData, int fieldSize) {
-		for (int j = 8*fieldSize -1; j >= 0; j--) {
+	private void handleGPIOFields(byte byteData) {
+		for (int j = 7; j >= 0; j--) {
 			if (isSet(byteData,j)) {
 				pin.pulse(100, true);
 				System.out.print("1");
 			} else {
 				System.out.print("0");
-				pin.low();
+	//			pin.low();
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
