@@ -181,11 +181,12 @@ public class IOTClientServer {
 						byte[] packet = constructPacket(messageId, byteArray);
 
 						handleGPIOPacket(packet);
+						System.out.println("GPIO Packet Sent. Onto ACKS now");
+						
+						messageId = checkAckReceived(messageId);
 
 						if (messageId == 255)
 							messageId = 0;
-						else
-							messageId++;
 					}
 
 					gpio.shutdown();
