@@ -5,17 +5,22 @@
  */
 package iot;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.ButtonGroup;
+
 /**
  *
  * @author mns (Sekharan Natarajan)
  */
-public class PC2UserInterface extends javax.swing.JFrame{
+public class PC2UserInterface extends javax.swing.JFrame {
 
     /**
      * Creates new form PC2Interface
      */
     public PC2UserInterface() {
         initComponents();
+        initRadioButtons();
     }
 
     /**
@@ -32,6 +37,8 @@ public class PC2UserInterface extends javax.swing.JFrame{
         LabelHeader = new javax.swing.JLabel();
         btnStart = new javax.swing.JButton();
         btnStop = new javax.swing.JButton();
+        rbKey = new javax.swing.JRadioButton();
+        rbFile = new javax.swing.JRadioButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("PC2 UI");
@@ -57,6 +64,10 @@ public class PC2UserInterface extends javax.swing.JFrame{
             }
         });
 
+        rbKey.setText("Key Strokes");
+
+        rbFile.setText("Files");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -73,10 +84,17 @@ public class PC2UserInterface extends javax.swing.JFrame{
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addGap(43, 43, 43)
-                .addComponent(btnStart)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 142, Short.MAX_VALUE)
-                .addComponent(btnStop)
-                .addGap(59, 59, 59))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(rbKey)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(rbFile)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnStart)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 142, Short.MAX_VALUE)
+                        .addComponent(btnStop)
+                        .addGap(59, 59, 59))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -87,7 +105,11 @@ public class PC2UserInterface extends javax.swing.JFrame{
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnStart)
                     .addComponent(btnStop))
-                .addGap(47, 47, 47)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(rbKey)
+                    .addComponent(rbFile))
+                .addGap(7, 7, 7)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -96,7 +118,7 @@ public class PC2UserInterface extends javax.swing.JFrame{
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-     
+
         // TODO add your handling code here:
         ArdSerial.getInstance(messenger).start();
     }//GEN-LAST:event_btnStartActionPerformed
@@ -146,13 +168,35 @@ public class PC2UserInterface extends javax.swing.JFrame{
     private javax.swing.JButton btnStart;
     private javax.swing.JButton btnStop;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JRadioButton rbFile;
+    private javax.swing.JRadioButton rbKey;
     private javax.swing.JTextArea textOutput;
     // End of variables declaration//GEN-END:variables
+
+    private ActionListener al = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(rbFile.isSelected()){
+                System.out.println("File");
+            }
+            if(rbKey.isSelected()){
+                System.out.println("Key");
+            }
+        }
+    };
+
+    private void initRadioButtons() {
+        ButtonGroup bg1 = new ButtonGroup();
+        bg1.add(rbFile);
+        bg1.add(rbKey);
+        rbFile.addActionListener(al);
+        rbKey.addActionListener(al);
+    }
 
     private IMessenger messenger = new IMessenger() {
         @Override
         public void sendMessage(String str) {
-            textOutput.setText(textOutput.getText()+str);
+            textOutput.setText(textOutput.getText() + str);
         }
     };
 
