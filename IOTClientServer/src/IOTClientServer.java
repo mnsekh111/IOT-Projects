@@ -22,6 +22,7 @@ public class IOTClientServer {
 		int portNum = 9991;
 		boolean runforever = true;
 		ServerSocket serverSocket = null;
+		ServerSocket ackSocket = null;
 		Socket clientSocket = null;
 
 		Scanner sc = new Scanner(System.in);
@@ -30,10 +31,12 @@ public class IOTClientServer {
 
 		try {
 			serverSocket = new ServerSocket(portNum);
-
-			System.out.println("Listening on port " + portNum);
+			ackSocket = new ServerSocket(9000);
+			
+			System.out.println("Listening Clients on port " + portNum);
+			System.out.println("Listening ACKS on port " + 9000);
 		} catch (IOException ie) {
-			System.err.println("Error listening at port " + portNum + "\n" + ie.getLocalizedMessage());
+			System.err.println("Error listening at port " + portNum + "or 9000 \n" + ie.getLocalizedMessage());
 			System.exit(1);
 		}
 
@@ -48,20 +51,13 @@ public class IOTClientServer {
 
 			String source = clientSocket.getInetAddress().getCanonicalHostName();
 			System.out.println("PCI client connected to " + source);
-			//if (source.contentEquals("localhost") || source.contentEquals("mns-G551JW")
-		//			|| source.contentEquals("vitellius")) {
-				IOTClientServer.PC1Handler handler = iotClientServer.new PC1Handler(clientSocket, mode);
+				IOTClientServer.PC1Handler handler = iotClientServer.new PC1Handler(clientSocket, ackSocket, mode);
 				handler.start();
-
-		//	} 
-			/*else if (source.contentEquals("pc2-client")) {
-				IOTClientServer.PC2Handler handler = iotClientServer.new PC2Handler(clientSocket, mode);
-				handler.start();
-			}*/
 		}
 
 		try {
 			serverSocket.close();
+			ackSocket.close();
 			sc.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -71,6 +67,7 @@ public class IOTClientServer {
 
 	class PC1Handler extends Thread {
 		private Socket clientSocket = null;
+		private ServerSocket ackSocket = null;
 		private static final int KEYSTROKE_READ_SIZE = 1;
 		private static final int FILE_READ_SIZE = 16;
 		private static final int MESSAGE_ID_SIZE = 1;
@@ -81,7 +78,7 @@ public class IOTClientServer {
 		private GpioController gpio = null;
 		private GpioPinDigitalOutput pin = null;
 
-		public PC1Handler(Socket soc, int mode) {
+		public PC1Handler(Socket soc, ServerSocket ackSocket, int mode) {
 			this.clientSocket = soc;
 			this.mode = mode;
 			gpio = GpioFactory.getInstance();
@@ -115,7 +112,6 @@ public class IOTClientServer {
 
 						byte[] packet = constructPacket(messageId, byteArray);
 						handleGPIOPacket(packet);
-						System.out.println("GPIO Packet Sent. Onto ACKS now");
 						
 						messageId = checkAckReceived(messageId);
 
@@ -132,16 +128,12 @@ public class IOTClientServer {
 		}
 
 		private int checkAckReceived(int messageId) {
-			System.out.println("Inside check ack message");
-			ServerSocket ackSocket = null;
+			
 			Socket clientAckSocket = null;
 			DataInputStream dis = null;
 			int nextMessageId=-1;
 			// Open socket
 			try {
-				ackSocket = new ServerSocket(9000);
-				System.out.println("Listening ACKS on port " + 9000);
-
 				// Listen for ack
 				while (true) {
 					System.out.println("Waiting for Client ACK sockets");
@@ -156,8 +148,6 @@ public class IOTClientServer {
 
 				}
 
-				// Close Socket
-				ackSocket.close();
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -181,7 +171,6 @@ public class IOTClientServer {
 						byte[] packet = constructPacket(messageId, byteArray);
 
 						handleGPIOPacket(packet);
-						System.out.println("GPIO Packet Sent. Onto ACKS now");
 						
 						messageId = checkAckReceived(messageId);
 
