@@ -20,6 +20,7 @@ import packetizer.SinglePacket2;
  */
 class PacketListener implements Runnable, SerialPortPacketListener {
 
+        public static int MODE = 0;
 	private IMessenger mess = null;
 	private boolean started = false;
 	private String customBuffer = "";
@@ -47,7 +48,6 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 	public void serialEvent(SerialPortEvent event) {
 		byte[] newData = event.getReceivedData();
 		
-		
 		if (started == false) {
 			if ((char) newData[0] == '1') {
 				customBuffer += "1";
@@ -60,27 +60,56 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 			}
 		} else { // PC2 has detected the start of the packet
 
-			customBuffer += ((char) newData[0]);
-			//System.out.println(customBuffer.length());
+                        if(MODE == 0){
+                            customBuffer += ((char) newData[0]);
+                            System.out.println(customBuffer.length());
 
-			if (customBuffer.length() == KEYSTROKE_PACKET_LENGTH) {
+                            if (customBuffer.length() == KEYSTROKE_PACKET_LENGTH) {
 
-				int messageId = Integer.parseInt(customBuffer.substring(0, 8), 2);
-				String data = "" + (char) Integer.parseInt(customBuffer.substring(8, 8 + KEYSTROKE_BITS), 2);
-				String actualChecksum = customBuffer.substring(8 + KEYSTROKE_BITS, 32);
+                                    int messageId = Integer.parseInt(customBuffer.substring(0, 8), 2);
+                                    String data = "" + (char) Integer.parseInt(customBuffer.substring(8, 8 + KEYSTROKE_BITS), 2);
+                                    String actualChecksum = customBuffer.substring(8 + KEYSTROKE_BITS, 32);
 
-				if (validChecksum(data, actualChecksum)) {
-					lastSuccessMsgId = messageId;
-					mess.sendMessage("\nData - " + data);
-					sendAck(lastSuccessMsgId, true);
-				} else {
-					sendAck(lastSuccessMsgId, false);
-				}
+                                    if (validChecksum(data, actualChecksum)) {
+                                            lastSuccessMsgId = messageId;
+                                            mess.sendMessage("\nData - " + data);
+                                            sendAck(lastSuccessMsgId, true);
+                                    } else {
+                                            sendAck(lastSuccessMsgId, false);
+                                    }
 
-				started = false;
-				customBuffer = "";
-			}
+                                    started = false;
+                                    customBuffer = "";
+                            }
+                        }else{
+                           customBuffer += ((char) newData[0]);
+                            System.out.println(customBuffer.length());
 
+                            if (customBuffer.length() == FILE_PACKET_LENGTH) {
+
+                                    int messageId = Integer.parseInt(customBuffer.substring(0, 8), 2);
+                                    String data = "" + (char) Integer.parseInt(customBuffer.substring(8, 8 + FILE_BITS), 2);
+                                    
+                                    String actualChecksum = customBuffer.substring(8 + FILE_BITS, 32);
+
+                                    if (validChecksum(data, actualChecksum)) {
+                                            lastSuccessMsgId = messageId;
+                                            for(int i=KEYSTROKE_BITS;i<FILE_BITS;i+=8){
+                                                String minData = "" + (char) Integer.parseInt(customBuffer.substring(i,i+KEYSTROKE_BITS), 2);
+                                                mess.sendMessage(minData);
+                                            }
+                                            
+                                            sendAck(lastSuccessMsgId, true);
+                                    } else {
+                                            sendAck(lastSuccessMsgId, false);
+                                    }
+                                    
+                                    
+
+                                    started = false;
+                                    customBuffer = "";
+                            }
+                        }
 		}
 
 	}
@@ -89,7 +118,7 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 		Socket socket = null;
 		DataOutputStream dos = null;
 		
-			messageId++;
+		messageId++;
 			
 		try {
 			System.out.println("Sending ACK - "+success+" - "+messageId);
