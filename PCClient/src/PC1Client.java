@@ -86,8 +86,7 @@ public class PC1Client {
 				Runtime.getRuntime().exec(cmd).waitFor();
 			} else if (choice == 2) {
 				System.out.println("Enter the name of the file :");
-				Scanner scanner = new Scanner(System.in);
-				String fileName = scanner.nextLine();
+				String fileName = sc.nextLine();
 				//String fileName = "/tmp/test";
 				
 				File file = new File(fileName);
