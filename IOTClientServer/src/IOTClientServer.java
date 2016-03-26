@@ -148,16 +148,27 @@ class PC1Handler extends Thread {
 	private void handleGPIOPacket(byte[] byteArray) {
 		
 		pin.pulse(PADDING_TIME, true);
-
+		
+		//Transmit MessageID
 		handleGPIOFields(byteArray[0]);
 		//System.out.print("||");
-		if(mode==1)	
+		//Transmit Data
+		if(mode==1) {	
 			handleGPIOFields(byteArray[1]);
-		else if(mode==2)
-			for(int i = 1;i<=FILE_READ_SIZE;i++) {
+			//Transmit Checksum
+			handleGPIOFields(byteArray[2]);
+			handleGPIOFields(byteArray[3]);
+		}
+		else if(mode==2) {
+			int i=1;
+			for(i = 1;i<=FILE_READ_SIZE;i++) {
 				handleGPIOFields(byteArray[i]);
 			}
 		//System.out.println();
+			handleGPIOFields(byteArray[i]);
+			handleGPIOFields(byteArray[i+1]);
+		}
+		
 	}
 
 	/**
