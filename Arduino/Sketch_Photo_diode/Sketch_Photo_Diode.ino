@@ -23,7 +23,6 @@ int highLight = 0;  //calibration for normal light value; leave at 0 for calibra
 float midway =0;
 int calibration_time=10;
 unsigned long startTime;
-//unsigned long lastReadTime;
 int interval=100; //clock interval. milliseconds
 
 void setup()
@@ -54,13 +53,16 @@ void setup()
       }
     }
 
-    midway=(highLight-normalLight)/2 + normalLight;
+    //midway=(highLight-normalLight)/2 + normalLight;
+    midway=highLight-(highLight-normalLight)/3 ;
     Serial.print("debug: normalLight set to:"); //
     Serial.println(normalLight); //
     Serial.print("debug: highLight set to:"); 
     Serial.println(highLight); 
     Serial.print("debug: midway set to:"); //
     Serial.println(midway); //
+    Serial.print("debug: interval set to:"); //
+    Serial.println(interval);
 
 }
 
