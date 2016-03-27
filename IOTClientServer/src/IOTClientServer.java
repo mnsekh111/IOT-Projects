@@ -29,7 +29,7 @@ public class IOTClientServer {
 
 		try {
 			serverSocket = new ServerSocket(portNum);
-			ackSocket = new ServerSocket(8000);
+			ackSocket = new ServerSocket(9000);
 
 			System.out.println("Listening Clients on port " + portNum);
 			System.out.println("Listening ACKS on port " + 9000);
