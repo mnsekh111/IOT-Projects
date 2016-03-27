@@ -6,13 +6,11 @@
 package iot;
 
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.Socket;
-
-import com.fazecast.jSerialComm.SerialPort;
-import com.fazecast.jSerialComm.SerialPortEvent;
-import com.fazecast.jSerialComm.SerialPortPacketListener;
-
-import packetizer.SinglePacket2;
 
 /**
  *
@@ -20,11 +18,12 @@ import packetizer.SinglePacket2;
  */
 class PacketListener implements Runnable, SerialPortPacketListener {
 
-        public static int MODE = 0;
+	public static int MODE = 0;
 	private IMessenger mess = null;
 	private boolean started = false;
 	private String customBuffer = "";
 	private static final int KEYSTROKE_BITS = 8;
+	private static final int MESSAGEID_BITS = 8;
 	private static final int FILE_BITS = 64;
 	private static final int KEYSTROKE_PACKET_LENGTH = 32;
 	private static final int FILE_PACKET_LENGTH = 88;
@@ -47,7 +46,7 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 	@Override
 	public void serialEvent(SerialPortEvent event) {
 		byte[] newData = event.getReceivedData();
-		
+
 		if (started == false) {
 			if ((char) newData[0] == '1') {
 				customBuffer += "1";
@@ -59,64 +58,75 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 				started = true;
 			}
 		} else { // PC2 has detected the start of the packet
-                        if(MODE == 0){
-                            customBuffer += ((char) newData[0]);
-                         //   System.out.println(customBuffer.length());
+			if (MODE == 0) {
+				customBuffer += ((char) newData[0]);
 
-                            if (customBuffer.length() == KEYSTROKE_PACKET_LENGTH) {
+				if (customBuffer.length() == KEYSTROKE_PACKET_LENGTH) {
 
-                                    int messageId = Integer.parseInt(customBuffer.substring(0, 8), 2);
-                                    String data = "" + (char) Integer.parseInt(customBuffer.substring(8, 8 + KEYSTROKE_BITS), 2);
-                                    String actualChecksum = customBuffer.substring(8 + KEYSTROKE_BITS, KEYSTROKE_PACKET_LENGTH);
+					int messageId = Integer.parseInt(customBuffer.substring(0, 8), 2);
+					String data = "" + (char) Integer.parseInt(customBuffer.substring(8, 8 + KEYSTROKE_BITS), 2);
+					String actualChecksum = customBuffer.substring(8 + KEYSTROKE_BITS, KEYSTROKE_PACKET_LENGTH);
 
-                                    System.out.println("Message ID - "+messageId);
-                    				System.out.println("Data - "+data);
-                    				System.out.println("Actual Checksum - "+actualChecksum);
-                    				
-                    				
-                                    if (validChecksum(data, actualChecksum)) {
-                                            lastSuccessMsgId = messageId;
-                                            mess.sendMessage(data);
-                                            sendAck(lastSuccessMsgId, true);
-                                    } else {
-                                            sendAck(lastSuccessMsgId, false);
-                                    }
+					System.out.println("Message ID - " + messageId);
+					System.out.println("Data - " + data);
+					System.out.println("Actual Checksum - " + actualChecksum);
 
-                                    started = false;
-                                    customBuffer = "";
-                            }
-                        }else{
-                           customBuffer += ((char) newData[0]);
+					if (validChecksum(data, actualChecksum)) {
+						lastSuccessMsgId = messageId;
+						mess.sendMessage(data);
+						sendAck(lastSuccessMsgId, true);
+					} else {
+						sendAck(lastSuccessMsgId, false);
+					}
 
-                            if (customBuffer.length() == FILE_PACKET_LENGTH) {
+					started = false;
+					customBuffer = "";
+				}
+			} else {
+				customBuffer += ((char) newData[0]);
 
-                                    int messageId = Integer.parseInt(customBuffer.substring(0, 8), 2);
-                                    String data = "";
-                                    
-                                    for(int i=KEYSTROKE_BITS;i<FILE_BITS;i+=8){
-                                        String minData = "" + (char) Integer.parseInt(customBuffer.substring(i,i+KEYSTROKE_BITS), 2);
-                                        data+=minData;
-                                    }
-                                    
-                                    String actualChecksum = customBuffer.substring(8 + FILE_BITS, FILE_PACKET_LENGTH);
+				if (customBuffer.length() == FILE_PACKET_LENGTH) {
 
-                                    System.out.println("Message ID - "+messageId);
-                    				System.out.println("Data - "+data);
-                    				System.out.println("Actual Checksum - "+actualChecksum);
-                    				
-                    				
-                                    if (validChecksum(data, actualChecksum)) {
-                                            lastSuccessMsgId = messageId;
-                                            sendAck(lastSuccessMsgId, true);
-                                            mess.sendMessage(data);
-                                    } else {
-                                            sendAck(lastSuccessMsgId, false);
-                                    }
-                                    
-                                    started = false;
-                                    customBuffer = "";
-                            }
-                        }
+					int messageId = Integer.parseInt(customBuffer.substring(0, 8), 2);
+					String data = "";
+
+					for (int i = MESSAGEID_BITS; i <= FILE_BITS; i += 8) {
+						String minData = "" + (char) Integer.parseInt(customBuffer.substring(i, i + KEYSTROKE_BITS), 2);
+						data += minData;
+					}
+
+					String actualChecksum = customBuffer.substring(8 + FILE_BITS, FILE_PACKET_LENGTH);
+
+					System.out.println("Message ID - " + messageId);
+					System.out.println("Data / Length - " + data + " - " + data.length());
+					System.out.println("Actual Checksum - " + actualChecksum);
+
+					File outputFile = new File("receivedFile");
+					FileOutputStream fos;
+					try {
+						fos = new FileOutputStream(outputFile);
+
+						if (validChecksum(data, actualChecksum)) {
+							lastSuccessMsgId = messageId;
+							sendAck(lastSuccessMsgId, true);
+							fos.write(data.getBytes());
+							mess.sendMessage(data);
+						} else {
+							sendAck(lastSuccessMsgId, false);
+						}
+
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					started = false;
+					customBuffer = "";
+				}
+			}
 		}
 
 	}
@@ -124,14 +134,16 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 	private void sendAck(int messageId, boolean success) {
 		Socket socket = null;
 		DataOutputStream dos = null;
-		
+
 		messageId++;
-			
+		
+		
+
 		try {
-			System.out.println("Sending ACK - "+success+" - "+messageId);
+			System.out.println("Sending ACK - " + success + " - " + messageId);
 			socket = new Socket("192.168.43.128", 9000);
 			dos = new DataOutputStream(socket.getOutputStream());
-			
+
 			dos.writeInt(messageId);
 			dos.close();
 			socket.close();
@@ -151,6 +163,7 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 				else
 					calculatedChecksum = "0" + calculatedChecksum;
 			}
+		System.out.println("Calculated checksum - " + calculatedChecksum);
 		return calculatedChecksum.equals(actualChecksum);
 	}
 
@@ -190,7 +203,6 @@ public class ArdSerial {
 			comPort.openPort();
 			comPort.addDataListener(listener);
 			mess.sendMessage("\nThe port is opened successfully ! \n");
-			SinglePacket2.initSinglePacket(0, 0, 0, 7, 7, 7);
 		} else {
 			mess.sendMessage("\nThe port is already open \n");
 		}
