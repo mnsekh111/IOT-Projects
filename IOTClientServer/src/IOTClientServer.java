@@ -1,8 +1,6 @@
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.ServerSocket;
@@ -31,7 +29,7 @@ public class IOTClientServer {
 
 		try {
 			serverSocket = new ServerSocket(portNum);
-			ackSocket = new ServerSocket(9000);
+			ackSocket = new ServerSocket(8000);
 
 			System.out.println("Listening Clients on port " + portNum);
 			System.out.println("Listening ACKS on port " + 9000);
@@ -106,8 +104,13 @@ public class IOTClientServer {
 
 					byte[] byteArray = new byte[FILE_READ_SIZE];
 					int messageId = 0;
-					while (in.read(byteArray) != -1) {
+					int len=0;
+					while ((len =in.read(byteArray)) != -1) {
 						while (true) {
+							if(len < FILE_READ_SIZE)
+								for (int i=len;i<FILE_READ_SIZE;i++)
+									byteArray[i] = (byte)' ';
+							
 							byte[] packet = constructPacket(messageId, byteArray);
 							handleGPIOPacket(packet);
 
@@ -224,6 +227,7 @@ public class IOTClientServer {
 			byte[] byteMessageId = BigInteger.valueOf(messageId).toByteArray();
 			byte[] checksum = CheckSum.checkSum16(data);
 
+			
 			System.arraycopy(byteMessageId, 0, packet, 0, byteMessageId.length);
 			System.arraycopy(data, 0, packet, byteMessageId.length, data.length);
 			System.arraycopy(checksum, 0, packet, byteMessageId.length + data.length, checksum.length);
@@ -271,11 +275,8 @@ public class IOTClientServer {
 
 			for (int j = 7; j >= 0; j--) {
 
-				// System.out.println("Current time -
-				// "+System.currentTimeMillis()%10000);
 				if (isSet(byteData, j)) {
 					System.out.print("1");
-					// pin.pulse(BIT_TIME, true);
 					pin.high();
 					try {
 						Thread.sleep(BIT_TIME - (System.currentTimeMillis() - lastTime));
