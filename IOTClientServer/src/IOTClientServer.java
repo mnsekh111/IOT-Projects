@@ -68,8 +68,8 @@ public class IOTClientServer {
 		private static final int KEYSTROKE_READ_SIZE = 1;
 		private static final int FILE_READ_SIZE = 8;
 		private static final int MESSAGE_ID_SIZE = 1;
-		private static final int PADDING_TIME = 500;
-		private static final int BIT_TIME = 100;
+		private static final int PADDING_TIME = 100;
+		private static final int BIT_TIME = 20;
 		private static final int CHECKSUM_SIZE = 2;
 		private int mode;
 		private GpioController gpio = null;
@@ -124,7 +124,7 @@ public class IOTClientServer {
 								break;
 							} else {
 								try {
-									Thread.sleep(500);
+									Thread.sleep(PADDING_TIME);
 								} catch (InterruptedException e) {
 									e.printStackTrace();
 								}
@@ -198,7 +198,7 @@ public class IOTClientServer {
 								break;
 							} else {
 								try {
-									Thread.sleep(500);
+									Thread.sleep(PADDING_TIME);
 								} catch (InterruptedException e) {
 									e.printStackTrace();
 								}
