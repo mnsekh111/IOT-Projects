@@ -25,9 +25,9 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 	private boolean started = false;
 	private String customBuffer = "";
 	private static final int KEYSTROKE_BITS = 8;
-	private static final int FILE_BITS = 128;
+	private static final int FILE_BITS = 64;
 	private static final int KEYSTROKE_PACKET_LENGTH = 32;
-	private static final int FILE_PACKET_LENGTH = 152;
+	private static final int FILE_PACKET_LENGTH = 88;
 	private static int lastSuccessMsgId = 0;
 
 	public PacketListener(IMessenger imes) {
@@ -59,20 +59,24 @@ class PacketListener implements Runnable, SerialPortPacketListener {
 				started = true;
 			}
 		} else { // PC2 has detected the start of the packet
-
                         if(MODE == 0){
                             customBuffer += ((char) newData[0]);
-                            System.out.println(customBuffer.length());
+                         //   System.out.println(customBuffer.length());
 
                             if (customBuffer.length() == KEYSTROKE_PACKET_LENGTH) {
 
                                     int messageId = Integer.parseInt(customBuffer.substring(0, 8), 2);
                                     String data = "" + (char) Integer.parseInt(customBuffer.substring(8, 8 + KEYSTROKE_BITS), 2);
-                                    String actualChecksum = customBuffer.substring(8 + KEYSTROKE_BITS, 32);
+                                    String actualChecksum = customBuffer.substring(8 + KEYSTROKE_BITS, KEYSTROKE_PACKET_LENGTH);
 
+                                    System.out.println("Message ID - "+messageId);
+                    				System.out.println("Data - "+data);
+                    				System.out.println("Actual Checksum - "+actualChecksum);
+                    				
+                    				
                                     if (validChecksum(data, actualChecksum)) {
                                             lastSuccessMsgId = messageId;
-                                            mess.sendMessage("\nData - " + data);
+                                            mess.sendMessage(data);
                                             sendAck(lastSuccessMsgId, true);
                                     } else {
                                             sendAck(lastSuccessMsgId, false);
@@ -83,29 +87,32 @@ class PacketListener implements Runnable, SerialPortPacketListener {
                             }
                         }else{
                            customBuffer += ((char) newData[0]);
-                            System.out.println(customBuffer.length());
 
                             if (customBuffer.length() == FILE_PACKET_LENGTH) {
 
                                     int messageId = Integer.parseInt(customBuffer.substring(0, 8), 2);
-                                    String data = "" + (char) Integer.parseInt(customBuffer.substring(8, 8 + FILE_BITS), 2);
+                                    String data = "";
                                     
-                                    String actualChecksum = customBuffer.substring(8 + FILE_BITS, 32);
+                                    for(int i=KEYSTROKE_BITS;i<FILE_BITS;i+=8){
+                                        String minData = "" + (char) Integer.parseInt(customBuffer.substring(i,i+KEYSTROKE_BITS), 2);
+                                        data+=minData;
+                                    }
+                                    
+                                    String actualChecksum = customBuffer.substring(8 + FILE_BITS, FILE_PACKET_LENGTH);
 
+                                    System.out.println("Message ID - "+messageId);
+                    				System.out.println("Data - "+data);
+                    				System.out.println("Actual Checksum - "+actualChecksum);
+                    				
+                    				
                                     if (validChecksum(data, actualChecksum)) {
                                             lastSuccessMsgId = messageId;
-                                            for(int i=KEYSTROKE_BITS;i<FILE_BITS;i+=8){
-                                                String minData = "" + (char) Integer.parseInt(customBuffer.substring(i,i+KEYSTROKE_BITS), 2);
-                                                mess.sendMessage(minData);
-                                            }
-                                            
                                             sendAck(lastSuccessMsgId, true);
+                                            mess.sendMessage(data);
                                     } else {
                                             sendAck(lastSuccessMsgId, false);
                                     }
                                     
-                                    
-
                                     started = false;
                                     customBuffer = "";
                             }

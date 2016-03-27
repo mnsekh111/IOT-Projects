@@ -178,11 +178,11 @@ public class PC2UserInterface extends javax.swing.JFrame {
         public void actionPerformed(ActionEvent e) {
             if(rbFile.isSelected()){
                 //System.out.println("File");
-                PacketListener.MODE = 0;
+                PacketListener.MODE = 1;
             }
             if(rbKey.isSelected()){
                 //System.out.println("Key");
-                PacketListener.MODE = 1;
+                PacketListener.MODE = 0;
             }
         }
     };

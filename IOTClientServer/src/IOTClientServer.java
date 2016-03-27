@@ -68,7 +68,7 @@ public class IOTClientServer {
 		private Socket clientSocket = null;
 		private ServerSocket ackSocket = null;
 		private static final int KEYSTROKE_READ_SIZE = 1;
-		private static final int FILE_READ_SIZE = 16;
+		private static final int FILE_READ_SIZE = 8;
 		private static final int MESSAGE_ID_SIZE = 1;
 		private static final int PADDING_TIME = 500;
 		private static final int BIT_TIME = 100;

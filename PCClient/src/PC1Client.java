@@ -73,14 +73,8 @@ public class PC1Client {
 						break;
 					
 					byte[] byteArray = BigInteger.valueOf(inputAscii).toByteArray();
-
 					out.write(byteArray, 0, byteArray.length); 
 					out.flush();
-
-					System.out.println("input Ascii - " + inputAscii);
-					for(byte b:byteArray)
-						System.out.println("bytes - "+b);
-
 				}
 				cmd = new String[] { "/bin/sh", "-c", "stty sane </dev/tty" };
 				Runtime.getRuntime().exec(cmd).waitFor();
