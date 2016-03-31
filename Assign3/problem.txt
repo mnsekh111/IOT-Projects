@@ -1,0 +1,159 @@
+Assignment 3: (Due April 5, 11:45pm) [weighting factor = 3] [Demos time slots will be decided with the TA in the week of April 11]
+
+The purpose of this assignment is to have you get some hands-on experience with MQTT. 
+
+
+
+For this assignment, you will require an Arduino Uno, a Raspberry Pi, an Intel Edison, three computers/laptops (or two computers/laptops and one smart phone), with WiFi interfaces, three LEDs, a light dependent resistor (LDR), a potentiometer, and some general resisters. 
+
+
+
+First of all, you have to install an MQTT broker on laptop # 1. You can use any MQTT broker you like (for example, look at the following links: http://mosquitto.org/2013/01/mosquitto-debian-repository/, http://www.hivemq.com/try-out/).
+
+I am not making it mandatory to choose a particular broker because I want you to explore around and learn about features of various brokers (such practical knowledge could really impress your job interviewers). In your report, justify why you used the broker that you used. The only restriction is that for this assignment, you have to run the broker on laptop # 1, and not use some online broker (there are several such online brokers available as well free).
+
+
+
+This deployment has 1 MQTT broker: the laptop # 1
+
+This deployment has following 4 MQTT clients:
+
+(a) Laptop # 2 (this will be publisher as well as subscriber)
+
+(b) Rasp Pi (this will be publisher as well as subscriber)
+
+(c) Intel Edison (this will only be subscriber)
+
+(d) Laptop # 3 OR the smart phone (this will only be subscriber)
+
+
+
+Connect an LDR and a potentiometer to your Arduino Uno through the ADC (search online and you will see numerous projects describing how to connect an LDR and a potentiometer to an Arduino). LDR is just a resistor whose resistence changes with the intensity of light. The potentiometer is basically a variable resister. There is a dial on the potentiometer, rotating which changes the resistence of the potentiometer. We will use the LDR to sense the amount of light, and turn an LED on and off based on the amount of light falling on the LDR. We will use the potentiometer to change the threshold at which the LED turns on.
+
+
+
+The Arduino Uno will be connected to the Laptop # 2 through USB serial interface. It will send the values of LDR and potentiometer once every 100 milliseconds to the laptop # 2 over the USB serial interface. This laptop number will be connected to the broker on laptop # 1 and will publish the values of the LDR to the topic "lightSensor" and of the potentiometer to the topic "threshold". Every time the laptop # 2 receives a value from the Arduino for either the LDR or the potentiometer, it compares these values with the previous most recent values from LDR and potentiometer, respectively. If the difference of either the LDR or the potentiometer is beyond a certain thredhold (you determine the appropriate threshold values), it publishes the LDR and potentimeter values to broker. The LDR values are published to the topic "lightSensor" and the potentiometer values are published to the topic "threshold". Before posting the values of the potentiometer to the topic, you may have to scale them. Take a hypothetical example. Suppose when you sample values from your ADC connected to LDR, you might observe that your ADC outputs a minimum value of 10 and max value of 100 based on no light to very bright light. Wheereas, when you sample values from the potentiometer, you might observe that your ADC outputs values in the range 90 to 250 based on where the dial on the potentiometer is. In this case, you might want to bring the values of ADC for potentiometer in the same range as that for LDR. This can be done in various ways. For example, you can normalize the ADC values of both LDR and potentiometer to lie between 0 and 1 before publishing. You can decide which ever method you like to use. You will shortly see that these values will be used by Edison to decide when to turn on or turn off an LED based on how much light is being sensed by the LDR connected to Arduino. With this potetiometer we can basically control what intensity of the light should be there before the Edison turns off the LED.
+
+
+
+Note that to compare the value of LDR or potentiometer with its previous most recent values that te laptop # 2 had published to the broker, you have two ways to go about:
+
+(1) Your laptop just remembers what it sent earlier. This method is not preferred because suppose your laptop looses the previous value it sent because of whatever reason, then it wont have anything to compare with.
+
+(2) Your laptop # 2 should subscribe to both these topics "lightSensor" and "threshold". Every time a message gets posted to these topics, the laptop # 2 receives it back. In case the laptop # 2 looses the connection and the previous values, it can reconnect to the broker and receive a "retained message" with the latest values. If you go with this method, then everytime you publish a message to the broker, you must set the retain flag to make sure that the broker reatins it.
+
+One more thing that laptop # 2 has to do is that in its connection message to the broker, it should include a lastwill message as retained message with content "offline" to a topic "Status/Arduino". As soon as it connects to the broker, it should send a retained message to the topic "Status/Arduino" with content "online". This step will make sure that anyone who is subscribed to the topic "Status/Arduino" should know the status of the Arduino board: whether the Arduino board along with the laptop # 2 is online or offline. If the laptop # 2 does a graceful disconnect, it should still send a retained message to "Status/Arduino" with content "offline".
+
+
+
+Rasp Pi is also connected to the broker and is subscribed to both topics "lightSensor" and "threshold". Every time it receives a message from the broker from either of the topics "lightSensor" and/or "threshold", it compares the LDR value with the threshold and generates a binary result: if "lightSensor" value >= "threshold" value, then the result is "TurnOn" otherwise "TurnOff". (Note that based on how you connected your LDR and potentiometer to the Arduino, the results of the comparison could be opposite. The goal is that when there is more light, then the result of the comparison done by Rasp Pi should be "Turnoff", otherwise "TurnOn"). The Rasp Pi then compares the result with the previous decision it sent to the broker. If the decision has changed, it publishes the updated decision on the broker implemented on the Laptop # 1 to topic "LightStatus". Note that, just like for laptop # 2, instead of remembering the decision Rasp Pi sent to the broker the last time, it can just subscribe to the topic "LightStatus" and set the retain flag every time it sends a new decision to this topic.
+
+One more thing that Rasp Pi has to do (just like laptop # 2) is that in its connection message to the broker, it should include a lastwill message as retained message with content "offline" to the topic "Status/RaspPi". As soon as it connects to the broker, it should send a retained message to the topic "Status/RaspPi" with content "online". This step will make sure that anyone who is subscribed to the topic "Status/RaspPi" should know the status of the Rasp Pi whether the Rasp Pi is online or offline. If the Rasp Pi does a graceful disconnect, it should still send a message to "Status/Rasp Pi" with content "offline".
+
+
+
+The Intel Edison should also connect to the broker and subscribe to the topic "LightStatus", "Status/Arduino", and "Status/RaspPi". The Intel Edison should also have three LEDs connected to it: LED1, LED2, and LED3. 
+
+If the Edison receives the message "TurnOff" from topic "LightStatus", it should turn the LED1 off.
+
+If the Edison receives the message "TurnOn" from the topic "LightStatus", it should turn LED1 on.
+
+LED2 and LED 3 will show the status of Arduino (along with its laptop # 2) and Rasp Pi. 
+
+If Edison receives a message of "online" from topic "Status/Arduino", it should turn the LED2 on.
+
+If Edison receives a message of "offline" from topic "Status/Arduino", it should turn the LED2 off.
+
+If Edison receives a message of "online" from topic "Status/RaspPi", it should turn the LED3 on and based on the most recent value it has received from "LightStatus", it should turn LED1 on or off. If the topic "LightStatus" does not yet have any value published on it, then Edison won't get any message from this topic. In that case the LED1 should stay off.
+
+If Edison receives a message of "offline" from topic "Status/RaspPi", it should turn the LED1 and LED3 off.
+
+
+
+Finally, your laptop # 3 or smartphone should be subscribed to all these topics: "lightSensor", threshold", "LightStatus", "Status/Arduino", and "Status/RaspPi" and should display the messages sent by the broker on these topics along with the timestamps. You will further keep a record on laptop # 3/smartphone when the LED1 was turned on and when it was turned off.
+
+
+
+For all message tranfers, use QoS 2 (i.e., the highest possible quality of service). You can use any programming language/environment you like.
+
+
+
+
+
+What to submit: (1 submission required per group of 3 or 4 as assigned by the instructor)
+
+In a single .zip file, upload the following
+
+1. Code for laptop 1 and a detailed readme file explaining how to execute the code
+
+2. Code for laptop 2 and a detailed readme file explaining how to execute the code
+
+3. Code for laptop 3/smartphone and a detailed readme file explaining how to execute the code
+
+4. Code to Raspberry Pi and a detailed readme file explaining how to execute the code
+
+5. Code to Arduino Uno and a detailed readme file explaining how to execute the code
+
+6. Code to Intel Edison and a detailed readme file explaining how to execute the code
+
+7. Schematics diagram of connection of LEDs to Intel Edison
+
+8. Schematics diagram of connection of LDR and potentiometer to Arduino Uno
+
+9. A document describing all your design choices such as which MQTT broker did you implement along with a step by step instruction to install it on a laptop/computer, what frequency did you sample the ADC at, what baud rate did you use to send data from Arduino to laptop # 2, how did you scale values from potentiometer/LDR before posting to their corresponding topics so that they could be compared by Rasp Pi, what was the range of raw values (min and max) that your ADC got from the LDR, what are the range of raw values that your ADC got from potentiometer(min and max), what are the range of scaled values (min and max) that resulted after you scaled the values from the potentiometer and/or LDR, etc
+
+10. A document containing names of each team member, what each team member did, and percentage contribution of each team member.
+
+
+
+Demo:
+
+Before the starting the demo, you will set up such that your laptop # 1 is running the broker, which has the five topics "lightSensor", threshold", "LightStatus", "Status/Arduino", and "Status/RaspPi". The Edison should be subscribed to all these topics. LED1, LED2, and LED3 should all be off.
+
+In the demo, following things will be done:
+
+Step 1: The TA will ask you to connect laptop # 2 (along with its Arduino) to broker. As soon as that happens, the LED2 connected to Edison should turn on. The TA will then ask you to send a graceful disconnect message to broker. As soon as that happens the LED2 should turn off.
+
+Step 2: The TA will ask you to connect laptop # 2 to broker again. As soon as that happens, the LED2 connected to Edison should turn on. The TA will then ask you to disconnect the laptop 2 from the internet. This mimics an ungraceful disconnect. The broker should detect this ungraceful disconnect as soon as possible and publish the lastwill retained message (with content "offline") to topic "Status/Arduino". This message will be received by Edison and it should turn the LED2 off again.
+
+Step 3: The TA will ask you to connect Rasp Pi to broker. As soon as that happens, the LED3 connected to Edison should turn on. The TA will then ask you to do an ungraceful disconnect by turning the Rasp Pi off. The broker should detect the ungraceful disconnect as soon as possible and publish the lastwill retained message (with content "offline") to topic "Status/RaspPi". This message will be received by Edison and it should turn the LED3 off.
+
+Step 4: The TA will ask you to connect laptop # 2 and Rasp Pi to broker, and the LED2 and LED3 should turn on. Then he will will put his finger on the LDR (to mimic a dark environment for the LDR). The LED1 connected to the Edison should turn on. The TA will lift the finger off the LDR (to mimic bright environment) and the LED1 should turn off.
+
+Step 5. The TA will cover the LDR slightly until the LED1 turns on. He will then change the potentiometer value, while keeping his hand at the same position over at LDR where the LED1 had turned on. The change in potentiometr is essentially changing the threshold for the intensity of light at which the LED1 turns on. By changing the value of the potentiometer while keeping his hand at the same location, he should be able to turn the LED1 off. This will demonstrate that the potentiometer is publishing messages correctly and are being received by the Rasp Pi and Edison correctly.
+
+Step 6: The TA will look at the log file in laptop # 3/smartphone. It should display all the messages sent by the broker in plain text. Note that we have implemented publishing logic such that duplicate messages never get poublished. If the TA sees a lot of duplicate messages in the log, that will result in negative grade. Note that you must NOT implement a code in laptop # 3/smart phone to remove duplicates. The duplicates should never be sent by the broker at the first place. If you implement such a code in laptop # 3/smart phone, that will count as cheating and result in a 0 grade for this assignment. Each set of 3 duplicates will result in 20% reduction in grade each for this step. As an exmaple, if you have four duplicate messages, then it will count as one set of 3 duplicates, and result in 20% reduction of grade for this step. But if you have six duplicate messages, then it will count as two sets of 3 duplicates and result in 40% reduction of grade for this step. If you think that a duplicate message is justified, then in the log file, your code should automatically mention a reason for getting that duplicate.
+
+Step 7: In a separate window, in laptop # 3/smart phone, display the timestamps when the LED1 was turned on and off ONLY during the demo. These time stamps should match the actual times when the LED was turned on and off  
+
+
+
+
+
+Grading:
+
+Grade assigned to the stuff you submit in the .zip file: 10%
+
+Correctly working step 1: 10%
+
+Correctly working step 2: 15%
+
+Correctly working step 3: 10%
+
+Correctly working step 4: 15%
+
+Correctly working step 5: 15%
+
+Correctly working step 6: 15%
+
+Correctly working step 7: 10%
+
+
+
+
+
+If you submit late, for every minute you are late, 0.05 point out of 100 will be deducted upto 50 points. The online submission system will close at 11:45pm on the due date. If you get late, email your submission .zip file as soon as it is ready to the TA and keep the instructor in CC. If you submit in time but later send an email after the deadline with another version attached and request that the new .zip file be considered, it will be considered but you will loose 0.05 * number of minutes late. We will not explicitly tell you this at the time of late submission. You can submit to moodle updated versions as many times as you like before the submission deadline.
+
+
+
+Notice that if you were to implement such a system for every electrical/electronic device in your home, you could keep a track of when each device was turned on and off. Furthermore, for most electrical devices, we know their average power consumption. So this way, on your laptop or smart phone, you could do some data analysis and determine which device used how much power each day. This analysis, could help you identify what sources are contributing the most towards the power consumption in your house, and consequently, taking the most money out of yur pocket. If we further extend it to a smart building, the power savings could be made significant. If we go a step further, we could apply some machine learning techniques and make the process of identifying the high power consumping devices automatic, and appropriately reducing their use without requiring any intervention from a human user. If you like, you can buy some wirelessly controllable power strips (I am not including any links to avoid publicizing any brand, but if you search online, you will find plenty). You can implement a broker on a laptop in your home, or use an online service. Connect all your appliances to sockets in these smart power strips and program the sockets to send update messages to the broker, which can then keep a track of when different appliacnes were turned on and off. By putting is some effort, you can also manually record the power consumption of each device (its usually written on each device in the units of kWh) and then calculate how much power each device used/is using in your home. The sockets on these power strips can be individually controlled using a smart phone app (that often comes with these smart power strips). Note that everything described in THIS paragraph is just for informational purpose.
