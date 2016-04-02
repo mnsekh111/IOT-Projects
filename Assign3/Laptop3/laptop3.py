@@ -8,7 +8,7 @@ def on_subscribe(client, userdata, mid, granted_qos):
 def on_message(client, userdata, msg):
     receivedTopic = msg.topic
     print("[" + time.ctime() + "] Topic = " + receivedTopic + ", QoS = " + str(msg.qos)+", Payload = "+str(msg.payload))
-    outputFile = open(receivedTopic.replace("\\",""),"a")
+    outputFile = open(sanitizeFileName(receivedTopic),"a")
     outputFile.write("[" + time.ctime() + "] Topic = " + receivedTopic + ", QoS = " + str(msg.qos)+", Payload = "+str(msg.payload))
     
 
@@ -18,6 +18,10 @@ def createLogFiles():
     lightStatusLog = open('lightStatus','w')
     statusRpiLog = open('statusRaspi','w')
     statusArduinoLog = open('statusArduino','w')
+
+def sanitizeFileName(input):
+    return input.replace("\\","").replace("/","")
+
 
 createLogFiles()
 
