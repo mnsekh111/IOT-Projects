@@ -10,6 +10,10 @@ def on_message(client, userdata, msg):
     print("[" + time.ctime() + "] Topic = " + msg.topic + ", QoS = " 
 + str(msg.qos)+", Payload = "+str(msg.payload))
 
+    global outputStatus
+    global rpiStatus
+    global arduinoStatus
+
 #Set Output Led status
     if msg.topic == "lightStatus":
         if msg.payload == "Turn On":
@@ -19,41 +23,36 @@ def on_message(client, userdata, msg):
 
 #Set Raspberry Led status
     if msg.topic == "status/Raspi":
-        if msg.payload == "Connect":
+        if msg.payload == "Online":
             rpiStatus = True
         else:
             rpiStatus = False
 
 #Set Arduino Led status
     if msg.topic == "status/Arduino":
-        if msg.payload == "Connect":
+        if msg.payload == "Online":
             arduinoStatus = True
         else:
             arduinoStatus = False
 
+    ledAction()
 
 def ledAction():
+    print "Arduino status - " + str(arduinoStatus)
     if arduinoStatus:
-        print "toggle arduino led on"
         arduinoLed.write(1)
     else:
-        print "toggle arduino led off"
         arduinoLed.write(0)
 
     if rpiStatus:
-        print "toggle rpi led on"
         rpiLed.write(1)
     else:
-        print "toggle rpi led off"
-        print "toggle output led off"
         rpiLed.write(0)
-        arduinoLed.write(0)
+        outputLed.write(0)
 
     if rpiStatus and outputStatus:
-        print "toggle output led on"
         outputLed.write(1)
     else:
-        print "toggle output led off"
         outputLed.write(0)
 
 #initialize Mraa
