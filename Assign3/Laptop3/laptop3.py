@@ -16,7 +16,7 @@ def createLogFiles():
     lightSensorLog = open('lightSensor','w')
     thresholdLog = open('threshold','w')
     lightStatusLog = open('lightStatus','w')
-    statusRpiLog = open('statusRpi','w')
+    statusRpiLog = open('statusRaspi','w')
     statusArduinoLog = open('statusArduino','w')
 
 createLogFiles()

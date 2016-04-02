@@ -8,17 +8,15 @@ def on_publish(client, userdata, mid):
 client = paho.Client("RaspberryPi")
 
 #Set Last Will to send "Offline" before disconnecting
-client.will_set("status/raspi", payload="Offline", qos=2, retain=True)
+client.will_set("status/Raspi", payload="Offline", qos=2, retain=True)
 
 #Set callbacks
 client.on_publish = on_publish
 
 #Connect to Broker
-client.connect("192.168.0.238", 1883)
-client.loop_start()
+client.connect("192.168.0.180", 1883)
 
 #Publish an "Online" message
-client.publish("status/raspi", payload="Online", qos=2, retain=True)
+client.publish("status/Raspi", payload="Online", qos=2, retain=True)
 
-while True:
-    time.sleep(30)
+client.loop_forever()

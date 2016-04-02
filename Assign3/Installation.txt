@@ -1,7 +1,6 @@
 ########################################################
 Steps to install Mosquitto Broker on Laptop 1 :
 ########################################################
-
 ---------------------------
 Ubuntu 
 ---------------------------
@@ -27,23 +26,21 @@ Or just install:
 
 sudo apt-get install mosquitto mosquitto-clients
 
----------------------------
-Windows
----------------------------
-Run the mosquitto-1.4.8-install-win32.exe file in the current folder.
-
 ########################################################
-Steps to install Paho MQTT Client on Laptop 2, Laptop 3, Raspberry Pi :
+Steps to install Paho MQTT Client on Laptop 2, Laptop 3, Raspberry Pi, Edison :
 ########################################################
-
 ---------------------------
 Ubuntu
 ---------------------------
 pip install paho-mqtt
 
+For Edison : 
+http://mendrugory.weebly.com/blog/intel-edison-and-python
+
+########################################################
+Steps to install PySerial on Laptop 2 :
+########################################################
 ---------------------------
-Windows
+Ubuntu
 ---------------------------
-Run cmd.exe as an Administrator
-Execute the following command from the Python/script folder.
-C:\Python27\Scripts>pip install paho-mqtt
+pip install pyserial

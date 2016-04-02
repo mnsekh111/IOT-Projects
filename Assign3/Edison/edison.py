@@ -7,7 +7,7 @@ def on_subscribe(client, userdata, mid, granted_qos):
 
 #Print messages to console and log files
 def on_message(client, userdata, msg):
-    print("[" + time.ctime() + "] Topic = " + receivedTopic + ", QoS = " 
+    print("[" + time.ctime() + "] Topic = " + msg.topic + ", QoS = " 
 + str(msg.qos)+", Payload = "+str(msg.payload))
 
 #Set Output Led status
@@ -18,14 +18,14 @@ def on_message(client, userdata, msg):
             outputStatus = False
 
 #Set Raspberry Led status
-    if msg.topic == "status/rpi":
+    if msg.topic == "status/Raspi":
         if msg.payload == "Connect":
             rpiStatus = True
         else:
             rpiStatus = False
 
 #Set Arduino Led status
-    if msg.topic == "arduinoStatus":
+    if msg.topic == "status/Arduino":
         if msg.payload == "Connect":
             arduinoStatus = True
         else:
