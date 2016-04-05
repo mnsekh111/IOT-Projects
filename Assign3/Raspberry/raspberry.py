@@ -54,6 +54,6 @@ client.on_connect = on_connect
 client.on_disconnect = on_disconnect
 
 #Connect to Broker
-client.connect("192.168.0.180", 1883)
+client.connect("192.168.0.180", 1883, keepalive=10)
 
 client.loop_forever()
