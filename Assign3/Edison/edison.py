@@ -78,7 +78,7 @@ client.on_subscribe = on_subscribe
 client.on_message = on_message
 
 #Connect to the broker
-client.connect("192.168.0.180", 1883)
+client.connect("192.168.0.180", 1883, keepalive=10)
 
 #Subscribe to topics
 client.subscribe("status/#", qos=2)
