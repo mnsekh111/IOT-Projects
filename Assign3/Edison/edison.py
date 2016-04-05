@@ -16,7 +16,7 @@ def on_message(client, userdata, msg):
 
 #Set Output Led status
     if msg.topic == "lightStatus":
-        if msg.payload == "Turn On":
+        if msg.payload == "TurnOn":
             outputStatus = True
         else:
             outputStatus = False
