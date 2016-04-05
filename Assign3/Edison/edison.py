@@ -38,7 +38,6 @@ def on_message(client, userdata, msg):
     ledAction()
 
 def ledAction():
-    print "Arduino status - " + str(arduinoStatus)
     if arduinoStatus:
         arduinoLed.write(1)
     else:
@@ -56,8 +55,8 @@ def ledAction():
         outputLed.write(0)
 
 #initialize Mraa
-rpiLed = mraa.Gpio(36)
-arduinoLed = mraa.Gpio(48)
+rpiLed = mraa.Gpio(48)
+arduinoLed = mraa.Gpio(36)
 outputLed = mraa.Gpio(14)
 rpiLed.dir(mraa.DIR_OUT)
 arduinoLed.dir(mraa.DIR_OUT)
