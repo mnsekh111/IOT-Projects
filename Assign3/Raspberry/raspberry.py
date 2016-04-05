@@ -2,7 +2,7 @@ import paho.mqtt.client as paho
 import time
 
 def on_publish(client, userdata, mid):
-    print("mid: "+str(mid))
+    print("data: "+str(userdata))
 
 def on_message(client, userdata, msg):
     print("[" + time.ctime() + "] Topic = " + msg.topic + ", QoS = " + str(msg.qos)+", Payload = "+str(msg.payload))
@@ -10,7 +10,7 @@ def on_message(client, userdata, msg):
 def on_connect(client, userdata, rc):
     print("Connected with result code "+str(rc))
     client.publish("status/Raspi", payload="Online", qos=2, retain=True)
-    client.subscribe([("lightSensor",2),("threshold",2)])
+    client.subscribe([("lightSensor",2),("threshold",2),("lightStatus",2)])
 
 def on_disconnect(client, userdata, rc):
     client.publish("status/Raspi", payload="Offline", qos=2, retain=True)
