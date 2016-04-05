@@ -11,7 +11,14 @@ def on_message(client, userdata, msg):
     outputFile = open(sanitizeFileName(receivedTopic),"a")
     outputFile.write("[" + time.ctime() + "] Topic = " + receivedTopic + ", QoS = " + str(msg.qos)+", Payload = "+str(msg.payload))
     
-
+def on_connect(client, userdata, rc):
+    print("Connected with result code "+str(rc))
+    #Subscribe to topics
+    client.subscribe("status/#", qos=2)
+    client.subscribe("lightSensor", qos=2)
+    client.subscribe("threshold", qos=2)
+    client.subscribe("lightStatus", qos=2)
+    
 def createLogFiles():
     lightSensorLog = open('lightSensor','w')
     thresholdLog = open('threshold','w')
@@ -31,14 +38,9 @@ client = paho.Client("Laptop3")
 #Add callbacks
 client.on_subscribe = on_subscribe
 client.on_message = on_message
+client.on_connect = on_connect
 
 #Connect to the broker
 client.connect("192.168.0.180", 1883,keepalive=10)
-
-#Subscribe to topics
-client.subscribe("status/#", qos=2)
-client.subscribe("lightSensor", qos=2)
-client.subscribe("threshold", qos=2)
-client.subscribe("lightStatus", qos=2)
 
 client.loop_forever()
