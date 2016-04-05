@@ -1,11 +1,36 @@
 import paho.mqtt.client as paho
 import time
 
+listSensorValue = 0
+thresholdValue = 0
+previousMessage = ""
+
 def on_publish(client, userdata, mid):
-    print("data: "+str(userdata))
+    print("Publishing value on mid - "+str(mid))
+
 
 def on_message(client, userdata, msg):
-    print("[" + time.ctime() + "] Topic = " + msg.topic + ", QoS = " + str(msg.qos)+", Payload = "+str(msg.payload))
+    print("Received message at [" + time.ctime() + "] Topic = " + msg.topic + ", QoS = " + str(msg.qos)+", Payload = "+str(msg.payload))
+    global listSensorValue    
+    global thresholdValue
+    global previousMessage
+    if msg.topic == "lightSensor":
+        listSensorValue = int(msg.payload)
+    if msg.topic == "threshold":
+        thresholdValue = int(msg.payload)
+    if msg.topic == "lightStatus":
+        previousMessage = msg.payload
+        return
+
+#If light is dim, turn on the led. Else turn off the led. Dont publish duplicate message. 
+    if listSensorValue <= thresholdValue:
+        if previousMessage != "Turn On":
+            print "Publish light on"
+            client.publish("lightStatus", payload="Turn On", qos=2, retain=True)
+    else:
+        if previousMessage != "Turn Off":
+            print "Publish light on"
+            client.publish("lightStatus", payload="Turn Off", qos=2, retain=True)
 
 def on_connect(client, userdata, rc):
     print("Connected with result code "+str(rc))
