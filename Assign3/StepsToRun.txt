@@ -1,0 +1,31 @@
+Note : All devices need to be on the same subnet. Subnet used in the code : 192.168.0.0/24
+
+Broker IP : 192.168.0.180
+Environment used : Ubuntu
+
+Pre requisite : 
+	- Install Paho MQTT client, PySerial, Mosquitto Broker as specified in Installation.txt
+
+1. Start Broker on Laptop 1 : 
+	> sh startBroker-Linux.sh
+
+2. Start Record Logger on Laptop 3 : 
+	> python laptop3.py
+
+3. Start Edison : 
+	> python edison.py
+
+4. Start Raspberry :
+	> python raspberry.py
+
+5. Deploy Sketch on Arduino :
+	> Deploy AnalogInput.ino using Arduino IDE
+
+6. Start Laptop 2 and Arduino :
+	- Connect Arduino to Laptop 2 via USB. (Code uses /dev/ttyACM1 as the serial port)
+     The next 4 steps need to be completed in a 15 seconds window since the laptop2 code is dependent on the calibration values of the Arduino :	
+	- Press reset on the Arduino (Arduino does calibration for the initial 15 seconds)
+	- Run 
+	  > python laptop2.py
+	- Cover the LDR to simulate a dark environment. Then flash a light on the LDR to simulate a  bright environment.
+	- Turn the potentiometer knob to Minimum and then Maximum
