@@ -24,13 +24,13 @@ def on_message(client, userdata, msg):
 
 #If light is dim, turn on the led. Else turn off the led. Dont publish duplicate message. 
     if listSensorValue <= thresholdValue:
-        if previousMessage != "Turn On":
+        if previousMessage != "TurnOn":
             print "Publish light on"
-            client.publish("lightStatus", payload="Turn On", qos=2, retain=True)
+            client.publish("lightStatus", payload="TurnOn", qos=2, retain=True)
     else:
-        if previousMessage != "Turn Off":
+        if previousMessage != "TurnOff":
             print "Publish light on"
-            client.publish("lightStatus", payload="Turn Off", qos=2, retain=True)
+            client.publish("lightStatus", payload="TurnOff", qos=2, retain=True)
 
 def on_connect(client, userdata, rc):
     print("Connected with result code "+str(rc))
