@@ -75,6 +75,6 @@ void loop() {
   Serial.println(potentiometerVal);
    
   // stop the program for 100 milliseconds:
-  delay(1000);
+  delay(100);
     
 }

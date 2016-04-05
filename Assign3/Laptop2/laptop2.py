@@ -76,7 +76,7 @@ client.on_connect = on_connect
 client.on_disconnect = on_disconnect
 
 #Connect to Broker
-client.connect("192.168.0.180", 1883)
+client.connect("192.168.0.180", 1883, keepalive=30)
 
 #Get high and low values for analog inputs
 getLimitValues()
@@ -105,5 +105,5 @@ while 1:
         client.publish("threshold", payload=normalize(readPotentiometer,lowPotentiometer,highPotentiometer), qos=2, retain=True)
 
 client.loop_stop()
-client.disconnect()
 
+client.disconnect()
