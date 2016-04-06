@@ -1,0 +1,33 @@
+IMU ----> IOT ------> IBM_BLUEMIX(Running libsvm.py)
+
+we get 6 waveforms from the device which are 
+	ACC_X,ACC_Y,ACC_X
+	GYRO_X, GYRO_Y, GYRO_Z
+
+
+Can be extended to gesture recognition in mobile phones (Try this if you have time) - Mobile phones have their own gyro and accelerometer sensors
+
+---> In android:
+		register for sensor events and continuously listen for them (Event listeners)
+		Inside the onEvent(Event ev)
+			--> send the information to the service hosted in IBM_BLUEMIX
+
+	
+All these values are sent to bluemix which will learn the model and for subsequent transmission of data,
+it will predict the status
+
+Break the waveform into some parts i.e discretize the wave forms and send only some property of the interval
+like average, gradient, highest, lowest etc.
+
+
+Try to collect a vast variety of training samples. ( To detect different gestures)
+
+You have to decide which values are representative of the door closing and door opening event . (PCA can help with that if you don't do it manually)
+
+
+After data in sent to bluemix:
+
+	Use LDA - (Attributes that give maximum information abt the class in the beginning and less distinguishing features at the end -  decide to ignore those values)
+	
+libsvm ---> svmtrain() ----> returns a model
+	   ---> svmpredict() --> returns class
