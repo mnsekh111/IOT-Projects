@@ -1,5 +1,6 @@
 from svm import *
 from svmutil import *
+import os
 import csv
 
 class_map = {"absent": 0, "present": 1}
@@ -42,10 +43,12 @@ for line in csv_reader:
         # print svm_line
         fout.write(svm_line + "\n")
 
-
 fout.close()
 fin.close()
 
+os.system("./svm-train -t 1 -q ./Occupancy\ Dataset/datatest1.svm")
+os.system("./svm-predict ./Occupancy\ Dataset/test.svm datatest1.svm.model result.svm")
 
-#print svm_read_problem("Occupancy Dataset/datatest1.svm")
-print svm_train(svm_read_problem("Occupancy Dataset/datatest1.svm"))
+# os.system("./svm-predict ./Occupancy\ Dataset/datatest1.svm > model")
+# #print svm_read_problem("Occupancy Dataset/datatest1.svm")
+# print svm_train(svm_read_problem("Occupancy Dataset/datatest1.svm"))
