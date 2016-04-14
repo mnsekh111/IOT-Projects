@@ -1,6 +1,7 @@
 from svm import *
 from svmutil import *
 import os
+
 import csv
 
 
@@ -59,30 +60,41 @@ class_vector = []
 # Convert from csv to libsvm format
 class_vector, data_vector = csv_to_libsvm("Occupancy Dataset/datatest.csv", True, 5, 6)
 
-print data_vector
+# Debug statement
+# print data_vector
 
+# Creating a new parameter
+param = svm_parameter('-t 0 -c 4 -b 1')
+# Creating a problem set from data and class vectors
 problem = svm_problem(class_vector, data_vector)
-model = svm_train(problem)
+# Generating a model only if no model file is present
+if os.path.exists("./svm.model"):
+    model = svm_load_model("./svm.model")
+else:
+    model = svm_train(problem, param)
+    svm_save_model("./svm.model", model)
 
-
-print model
-
+# Debug statement
+# print model
 
 # For storing the test data values and their predicted class
 test_data_vector = []
 test_class_vector = []
 
 # Here test_class_vector will be empty (-1 specifies no class dimension)
-test_class_vector, test_data_vector = csv_to_libsvm("test.csv", True, -1, 5)
-test_class_vector = model.predict(test_data_vector)
+test_class_vector, test_data_vector = csv_to_libsvm("test.csv", False, -1, 5)
 
-print test_class_vector
+test_class_vector = [0] * len(test_data_vector);
+p_label, p_acc, p_val = svm_predict(test_class_vector, test_data_vector, model, '-b 1')
 
+# Debug statement
+# print p_label, p_acc, p_val
 
+test_class_vector = p_label
 target = open("result.csv", 'w')
 # Writing to the output file
-for i in range(0,len(test_class_vector)):
-    target.write(test_class_vector[i]+",")
+for i in range(0, len(test_class_vector)):
+    target.write(str(test_class_vector[i]) + ",")
 
 target.close()
 
