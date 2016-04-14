@@ -6,49 +6,50 @@ import csv
 
 
 def csv_to_libsvm(file_path, header, class_ind, num_cols):
-    class_index = class_ind
-    num_columns = num_cols
-
-    try:
-        input_path = file_path
-        fin = open(input_path, "r")
-
-    except (IndexError, IOError) as err:
-        print(err)
-        exit(1)
-
-    # create a file reader
-    csv_reader = csv.reader(fin)
-
-    # Ignore the first line
-    if header:
-        line = csv_reader.next()
-
     data_v = []
     class_v = []
 
-    # Reading the training data and  populating the data and class vectors
-    for line in csv_reader:
-        if len(line) != num_columns:
-            print "malformed record"
-        else:
-            if class_index != -1:
-                svm_line = str(class_map[line[class_index]]) + " "
+    class_index = class_ind
+    num_columns = num_cols
 
-            new_obj = {}
-            for i in range(0, num_columns):
-                if i != class_index:
-                    if class_index != -1:
-                        svm_line = svm_line + str(i + 1) + ":" + str(line[i]) + " "
-                    new_obj[i + 1] = float(line[i])
+    for index in range(0, len(file_path)):
+        try:
+            input_path = file_path[index]
+            fin = open(input_path, "r")
 
-            data_v.append(new_obj)
+        except (IndexError, IOError) as err:
+            print(err)
+            exit(1)
 
-            # If the class is present (i.e it is training data)
-            if class_index != -1:
-                class_v.append(float(class_map[line[class_index]]))
+        # create a file reader
+        csv_reader = csv.reader(fin)
 
-    fin.close()
+        # Ignore the first line
+        if header:
+            line = csv_reader.next()
+
+        # Reading the training data and  populating the data and class vectors
+        for line in csv_reader:
+            if len(line) != num_columns:
+                print "malformed record"
+            else:
+                if class_index != -1:
+                    svm_line = str(class_map[line[class_index]]) + " "
+
+                new_obj = {}
+                for i in range(0, num_columns):
+                    if i != class_index:
+                        if class_index != -1:
+                            svm_line = svm_line + str(i + 1) + ":" + str(line[i]) + " "
+                        new_obj[i + 1] = float(line[i])
+
+                data_v.append(new_obj)
+
+                # If the class is present (i.e it is training data)
+                if class_index != -1:
+                    class_v.append(float(class_map[line[class_index]]))
+
+        fin.close()
     return class_v, data_v
 
 
@@ -59,7 +60,9 @@ data_vector = []
 class_vector = []
 
 # Convert from csv to libsvm format
-class_vector, data_vector = csv_to_libsvm("Occupancy Dataset/datatest.csv", True, 5, 6)
+class_vector, data_vector = csv_to_libsvm(
+    ["Occupancy Dataset/datatest1.csv", "Occupancy Dataset/datatest2.csv", "Occupancy Dataset/datatest3.csv"], True, 5,
+    6)
 
 # Debug statement
 # print data_vector
@@ -83,9 +86,10 @@ test_data_vector = []
 test_class_vector = []
 
 # Here test_class_vector will be empty (-1 specifies no class dimension)
-test_class_vector, test_data_vector = csv_to_libsvm("test.csv", False, -1, 5)
+test_class_vector, test_data_vector = csv_to_libsvm(
+    ["Occupancy Dataset/datatest1.csv"], True, 5, 6)
 
-test_class_vector = [0] * len(test_data_vector);
+# test_class_vector = [0] * len(test_data_vector);
 p_label, p_acc, p_val = svm_predict(test_class_vector, test_data_vector, model, '-b 1')
 
 # Debug statement
