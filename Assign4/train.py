@@ -53,7 +53,8 @@ def csv_to_libsvm(file_path, header, class_ind, num_cols):
 
 
 # Class map to represent string as integer/float which is required by libsvm format
-class_map = {"absent": 0, "present": 1}
+class_map = {"absent": 0.0, "present": 1.0}
+rev_class_map = {0.0: "absent", 1.0: "present"}
 data_vector = []
 class_vector = []
 
@@ -94,7 +95,7 @@ test_class_vector = p_label
 target = open("result.csv", 'w')
 # Writing to the output file
 for i in range(0, len(test_class_vector)):
-    target.write(str(test_class_vector[i]) + ",")
+    target.write(rev_class_map[test_class_vector[i]] + ",")
 
 target.close()
 
