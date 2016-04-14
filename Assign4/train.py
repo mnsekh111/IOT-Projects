@@ -102,7 +102,7 @@ test_class_vector = p_label
 target = open("result.csv", 'w')
 # Writing to the output file
 for i in range(0, len(test_class_vector)):
-    target.write(rev_class_map[test_class_vector[i]] + ",")
+    target.write(rev_class_map[test_class_vector[i]] + "\n")
 
 target.close()
 
