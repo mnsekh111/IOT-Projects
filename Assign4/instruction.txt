@@ -1,0 +1,7 @@
+#Instructions to run the code
+
+1. Decompress the compressed file
+2. Enter into Assign4 folder
+3. Place the test.csv file with in this folder
+4. Run train.py
+5. A new file named results.csv will be created in the same folder
