@@ -3,7 +3,7 @@ https://github.com/mnsekh111/IOT-Projects/tree/master/Arduino/Sketch_Photo_diode
 
 # IOT-Projects
 
-<blockquote>All IOT programming done as part of CSC592</blockquote>
+<blockquote>All IOT programming done as part of CSC591</blockquote>
 
 Setting up Intel Edison on Linux (Ubuntu 14.04.3 Gnome)
 
