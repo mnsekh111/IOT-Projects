@@ -1,0 +1,19 @@
+Testing datatest3.csv with the model created from the 1 and 2
+Accuracy = 97.3106% (7924/8143) (classification)
+
+Testing datatest2.csv and datatest3.csv with the model created from the 1
+Accuracy = 80.5532% (14415/17895) (classification)
+
+Testing datatest1.csv with the model created from the 2 and 3
+Accuracy = 95.9099% (2556/2665) (classification)
+
+
+Testing datatest2.csv with the model created from the 1 and 3
+Accuracy = 88.2896% (8609/9752) (classification)
+
+From the above trials we see that data from datatest2.csv is more accurate in predicting the occupancy and hence we tried to build a model
+entirely from datatest2 and test the result on the datatest3.csv and datatest1.csv
+
+Accuracy = 98.5104% (10647/10808) (classification)
+
+
