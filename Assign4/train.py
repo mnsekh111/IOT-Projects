@@ -48,6 +48,8 @@ def csv_to_libsvm(file_path, header, class_ind, num_cols):
                 # If the class is present (i.e it is training data)
                 if class_index != -1:
                     class_v.append(float(class_map[line[class_index]]))
+                else:
+                    class_v.append(0.0)
 
         fin.close()
     return class_v, data_v
@@ -61,7 +63,7 @@ class_vector = []
 
 # Convert from csv to libsvm format
 class_vector, data_vector = csv_to_libsvm(
-    ["Occupancy Dataset/datatest1.csv", "Occupancy Dataset/datatest2.csv", "Occupancy Dataset/datatest3.csv"], True, 5,
+    ["Occupancy Dataset/datatest2.csv"], True, 5,
     6)
 
 # Debug statement
@@ -85,9 +87,10 @@ else:
 test_data_vector = []
 test_class_vector = []
 
-# Here test_class_vector will be empty (-1 specifies no class dimension)
+# Here test_class_vector will be empty
+# If no class is specified the test.csv, then set the second parameter to -1
 test_class_vector, test_data_vector = csv_to_libsvm(
-    ["Occupancy Dataset/datatest1.csv"], True, 5, 6)
+    ["test.csv"], False, -1, 5)
 
 # test_class_vector = [0] * len(test_data_vector);
 p_label, p_acc, p_val = svm_predict(test_class_vector, test_data_vector, model, '-b 1')
