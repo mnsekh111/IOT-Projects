@@ -17,10 +17,10 @@ def split(str):
         result.append(0)
     return result
 
-def scale(original_value, max_value):
-    #print type(original_value), type(max_value)
+def scale(original_value, max_value, min_value):
+    #print type(original_value), type(max_value), type(min_value)
     #print original_value, max_value
-    return float(original_value) * 1.0 / float(max_value)
+    return (float(original_value) - float(min_value)) * 1.0 / (float(max_value) - float(min_value))
 
 def convert_with_scale(filename):
     values = []
@@ -31,15 +31,16 @@ def convert_with_scale(filename):
     humidityratio = []
     occupacy = []
     with open(filename) as csvfile:
-        print "success"
+        #print "success"
         next(csvfile)
         for row in csvfile:
             values = row.split(",")
-            temperature.append(values[0])
-            humidity.append(values[1])
-            light.append(values[2])
-            co2.append(values[3])
-            humidityratio.append(values[4])
+           
+            temperature.append(float(values[0]))
+            humidity.append(float(values[1]))
+            light.append(float(values[2]))
+            co2.append(float(values[3]))
+            humidityratio.append(float(values[4]))
             occupacy.append(values[5])
     csvfile.close()
     
@@ -48,19 +49,28 @@ def convert_with_scale(filename):
     max_light       = max(light)
     max_co2         = max(co2)
     max_humidityratio = max(humidityratio)
+
+    min_temperature = min(temperature)
+    min_humidity    = min(humidity)
+    min_light       = min(light)
+    min_co2         = min(co2)
+    min_humidityratio = min(humidityratio)
+
+    
     #max_occupacy    =[]
     
     print max_temperature, max_humidity, max_light, max_co2, max_humidityratio
     new_file_name = "".join(filename + ".converted")
 
     num = len(temperature)
+    print num
     with open(new_file_name, 'w') as convertedfile:
         for i in range(num):
-            tmp_temperature = scale(temperature[i], max_temperature)
-            tmp_humidity = scale(humidity[i], max_humidity)
-            tmp_light = scale(light[i], max_light)
-            tmp_co2 = scale(co2[i], max_co2)
-            tmp_humidityratio = scale(humidityratio[i], max_humidityratio)
+            tmp_temperature = scale(temperature[i], max_temperature, min_temperature)
+            tmp_humidity = scale(humidity[i], max_humidity, min_temperature)
+            tmp_light = scale(light[i], max_light, min_light)
+            tmp_co2 = scale(co2[i], max_co2, min_co2)
+            tmp_humidityratio = scale(humidityratio[i], max_humidityratio, min_humidityratio)
             if (occupacy[i] == "present\n"):
                 presence = "+1"
             else:
@@ -76,6 +86,7 @@ def convert(filename):
         next(csvfile)
         for row in csvfile:
             values = row.split(",")
+#            print values
             #temperature.append(values[0])
             #humidity.append(values[1])
             #light.append(values[2])
@@ -96,16 +107,47 @@ if __name__ == "__main__":
     sys.path.append('C:\\Users\\wzp\\Desktop\\NCSU\\SpringCourses\\791\\Homework\\Assignment4\\libsvm-master\\python')
     os.chdir('C:\\Users\\wzp\\Desktop\\NCSU\\SpringCourses\\791\\Homework\\Assignment4\\libsvm-master\\python')
 
-    dtrain_name = "datatest1.csv"
-    convert_with_scale(dtrain_name)
-    train_y, train_x = svm_read_problem(dtrain_name + ".converted")
-    m = svm_train(train_y, train_x, '-c 2 -t 3 ')
+    scaling = "yes"
 
-    dtest_name = ["datatest2.csv", "datatest3.csv"]
-    for i in dtest_name:
-        convert_with_scale(i)
-        test_y, test_x = svm_read_problem(i + ".converted")
-        p_label, p_acc, p_val = svm_predict(test_y, test_x, m)
+    for C_index in range(-1, 4):
+        for gamma_index in range(-1, 4):
+            print C_index, gamma_index
+            C_value = 2**C_index
+            gamma_value = 2**gamma_index
+            dtrain_name = ["123.csv"]
+            for i in dtrain_name:
+                if (scaling == "yes"):
+                    print "converted"
+                    convert_with_scale(i)
+                else:
+                    convert(i)
+                train_y, train_x = svm_read_problem(i + ".converted")
+                #m = svm_train(train_y, train_x, '-c 2 -t 2')
+                param = '-t 2 -v 10 -c %f -g %f' % (C_value, gamma_value)
+                print param
+                m = svm_train(train_y, train_x, param)
+            #print "Training is finished"
+    
+    #dtrain_name = ["datatest1.csv", "datatest2.csv", "datatest3.csv"]
+    #for i in dtrain_name:
+    #    if (scaling == "yes"):
+    #        print "converted"
+    #        convert_with_scale(i)
+    #    else:
+    #        convert(i)
+    #    train_y, train_x = svm_read_problem(i + ".converted")
+    #    #m = svm_train(train_y, train_x, '-c 2 -t 2')
+    #    m = svm_train(train_y, train_x, '-t 2 -v 10')
+    #    print "Training is finished"
+    #
+    #    dtest_name = ["datatest1.csv", "datatest2.csv", "datatest3.csv"]
+    #    for j in dtest_name:
+    #        if (scaling == "yes"):
+    #            convert_with_scale(j)
+    #        else:
+    #            convert(j)
+    #        test_y, test_x = svm_read_problem(j + ".converted")
+    #        p_label, p_acc, p_val = svm_predict(test_y, test_x, m)
 
 
     #print temperature
