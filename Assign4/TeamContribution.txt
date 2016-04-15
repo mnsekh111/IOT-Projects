@@ -10,13 +10,13 @@ Sekharan Natarajan:
 Worked on cross validation and data format conversion
 
 Dhaval Sonawane :
-
+Worked on comparing performance of different kernels
 
 Zhipeng Wei:
-
+Worked on RBF and performing elbow plotting
 
 Michael Xu:
-
+Worked on experimenting various parameters for training
 
 Percentage contribution of each team member:
 

@@ -1,47 +1,29 @@
 Documentation:
 =============
-These are some of the properties of our model:
 svm_type c_svc
-kernel_type linear
+kernel_type rbf
+gamma 8
 nr_class 2
-total_sv 192
-rho 2.1911
+total_sv 543
+rho 0.752442
 label 1 0
-probA -1.40221
-probB 1.87531
-nr_sv 98 94
+nr_sv 281 262
 SV
 
-How we selected the training set for the model:
-===============================================
 
-Testing datatest3.csv with the model created from the 1 and 2
-Accuracy = 97.3106% (7924/8143) (classification)
+param = svm_parameter('-t (1-3) -h 0 -v 10')
 
-Testing datatest2.csv and datatest3.csv with the model created from the 1
-Accuracy = 80.5532% (14415/17895) (classification)
+What are the different kernels we tried?
+0 -- linear: u'*v   - Cross Validation Accuracy = 98.8473%
+1 -- polynomial: (gamma*u'*v + coef0)^degree   : Cross Validation Accuracy = 94.5136%
+2 -- radial basis function: exp(-gamma*|u-v|^2) : Cross Validation Accuracy = 98.7403%
+3 -- sigmoid: tanh(gamma*u'*v + coef0) :Cross Validation Accuracy = 98.7889%
 
-Testing datatest1.csv with the model created from the 2 and 3
-Accuracy = 95.9099% (2556/2665) (classification)
-
-
-Testing datatest2.csv with the model created from the 1 and 3
-Accuracy = 88.2896% (8609/9752) (classification)
-
-From the above trials we see that data from datatest2.csv is more accurate in predicting the occupancy and hence we tried to build a model
-entirely from datatest2 and test the result on the datatest3.csv and datatest1.csv
-
-Accuracy = 98.5104% (10647/10808) (classification)
-
-    testing only datatest1.csv with this model gives
-        Accuracy = 97.8612% (2608/2665) (classification)
-
-    testing only datatest1.csv with this model gives
-        Accuracy = 98.7842% (8044/8143) (classification)
-
-
-We also created a model which takes all the three datasets and tested against datatest1.csv and got
-Accuracy = 93.5835% (2493/2665) (classification)
+param = svm_parameter('-t (1-3) -h 0 -v 10 -c 8 -g 8')
+0 -- linear: u'*v   - Cross Validation Accuracy = 98.8911%
+1 -- polynomial: (gamma*u'*v + coef0)^degree   : Cross Validation Accuracy = 94.5136%
+2 -- radial basis function: exp(-gamma*|u-v|^2) : Cross Validation Accuracy = 98.9786%
+3 -- sigmoid: tanh(gamma*u'*v + coef0) :Cross Validation Accuracy = 59.1488%
 
 
 
