@@ -63,14 +63,14 @@ class_vector = []
 
 # Convert from csv to libsvm format
 class_vector, data_vector = csv_to_libsvm(
-    ["Occupancy Dataset/datatestall.csv"], True, 5,
+    ["Occupancy Dataset/datatest2.csv"], True, 5,
     6)
 
 # Debug statement
 # print data_vector
 
 # Creating a new parameter
-param = svm_parameter('-t 2 -g .000001 -b 1 -c 512 ')
+param = svm_parameter('-t 2 -g .00001 -b 1 -c 512')
 # Creating a problem set from data and class vectors
 problem = svm_problem(class_vector, data_vector)
 # Generating a model only if no model file is present
