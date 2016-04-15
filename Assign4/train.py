@@ -70,15 +70,13 @@ class_vector, data_vector = csv_to_libsvm(
 # print data_vector
 
 # Creating a new parameter
-param = svm_parameter('-t 0 -c 4 -b 1')
+param = svm_parameter('-t 2 -g .00001 -b 1 -c 512')
 # Creating a problem set from data and class vectors
 problem = svm_problem(class_vector, data_vector)
 # Generating a model only if no model file is present
-if os.path.exists("./svm.model"):
-    model = svm_load_model("./svm.model")
-else:
-    model = svm_train(problem, param)
-    svm_save_model("./svm.model", model)
+
+model = svm_train(problem, param)
+svm_save_model("./svm.model", model)
 
 # Debug statement
 # print model
@@ -105,13 +103,3 @@ for i in range(0, len(test_class_vector)):
     target.write(rev_class_map[test_class_vector[i]] + "\n")
 
 target.close()
-
-
-
-# os.system("./svm-train -t 1 -q ./Occupancy\ Dataset/datatest1.svm")
-# os.system("./svm-predict ./Occupancy\ Dataset/test.svm datatest1.svm.model result.svm")
-
-
-# os.system("./svm-predict ./Occupancy\ Dataset/datatest1.svm > model")
-# #print svm_read_problem("Occupancy Dataset/datatest1.svm")
-# print svm_train(svm_read_problem("Occupancy Dataset/datatest1.svm"))
