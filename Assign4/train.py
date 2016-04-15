@@ -4,6 +4,9 @@ import os
 
 import csv
 
+min_val = [100000.0] * 5
+max_val = [-100000.0] * 5
+
 
 def csv_to_libsvm(file_path, header, class_ind, num_cols):
     data_v = []
@@ -52,6 +55,22 @@ def csv_to_libsvm(file_path, header, class_ind, num_cols):
                     class_v.append(0.0)
 
         fin.close()
+
+    for indi in range(0, len(data_v[0])):
+        for indj in range(0, len(data_v)):
+            if min_val[indi] > data_v[indj][indi + 1]:
+                min_val[indi] = data_v[indj][indi + 1]
+            if max_val[indi] < data_v[indj][indi + 1]:
+                max_val[indi] = data_v[indj][indi + 1]
+
+    for indi in range(0, len(data_v[0])):
+        for indj in range(0, len(data_v)):
+            data_v[indj][indi + 1] = 1.0 / (max_val[indi] - min_val[indi]) * (data_v[indj][indi + 1] - min_val[indi])
+
+    #print min_val, max_val
+
+    if len(class_v) != len(data_v):
+        class_v = [0] * len(data_v)
     return class_v, data_v
 
 
@@ -63,14 +82,14 @@ class_vector = []
 
 # Convert from csv to libsvm format
 class_vector, data_vector = csv_to_libsvm(
-    ["Occupancy Dataset/datatest2.csv"], True, 5,
+    ["Occupancy Dataset/datatest1.csv", "Occupancy Dataset/datatest2.csv", "Occupancy Dataset/datatest3.csv"], True, 5,
     6)
 
 # Debug statement
 # print data_vector
 
 # Creating a new parameter
-param = svm_parameter('-t 0 -c 4 -b 1')
+param = svm_parameter('-t 2 -h 0 -c 8 -g 8')
 # Creating a problem set from data and class vectors
 problem = svm_problem(class_vector, data_vector)
 # Generating a model only if no model file is present
@@ -90,10 +109,10 @@ test_class_vector = []
 # Here test_class_vector will be empty
 # If no class is specified the test.csv, then set the second parameter to -1
 test_class_vector, test_data_vector = csv_to_libsvm(
-    ["test.csv"], False, -1, 5)
+    ["test.csv"], True, -1, 5)
 
-# test_class_vector = [0] * len(test_data_vector);
-p_label, p_acc, p_val = svm_predict(test_class_vector, test_data_vector, model, '-b 1')
+
+p_label, p_acc, p_val = svm_predict(test_class_vector, test_data_vector, model)
 
 # Debug statement
 # print p_label, p_acc, p_val
