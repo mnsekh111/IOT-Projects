@@ -27,33 +27,36 @@ def my_callback(cmd):
     global curr_data
     global result
 
+    if cmd.event == "Result":
+        result = json.loads(cmd.payload)
+
     if cmd.event == "SensorData":
         data = json.loads(cmd.payload)
         print data
         curr_data = str(data)
-    try:      
-        model = svm_load_model("svm.model")
-        split_strings = curr_data.split(" ")
-        test_data=[]
-        tmp = {}
-        tmp[1] = float(split_strings[0].split(":")[1])
-        tmp[2] = float(split_strings[1].split(":")[1])
-        tmp[3] = float(split_strings[2].split(":")[1])
-        tmp[4] = float(split_strings[3].split(":")[1])
-        tmp[5] = float(split_strings[4].split(":")[1])
-        tmp[6] = float(split_strings[5].split(":")[1])
-        test_data.append(tmp)
+        try:      
+            model = svm_load_model("svm.model")
+            split_strings = curr_data.split(" ")
+            test_data=[]
+            tmp = {}    
+            tmp[1] = float(split_strings[0].split(":")[1])
+            tmp[2] = float(split_strings[1].split(":")[1])
+            tmp[3] = float(split_strings[2].split(":")[1])
+            tmp[4] = float(split_strings[3].split(":")[1])
+            tmp[5] = float(split_strings[4].split(":")[1])
+            tmp[6] = float(split_strings[5].split(":")[1])
+            test_data.append(tmp)
         
-        plabels, p_acc, p_vals = svm_predict([0], test_data, model, options="")
-        if int(plabels[0]) == -1:
-            print "Close"
-            result="Close"
-        elif int(plabels[0]) == 1:
-            print "Open"
-            result="Open"
-
-    except:
-        traceback.print_exc()
+            plabels, p_acc, p_vals = svm_predict([0], test_data, model, options="")
+            if int(plabels[0]) == -1:
+                print "Close"
+                decision="Close"
+            elif int(plabels[0]) == 1:
+                print "Open"
+                decision="Open"
+            client.publishEvent("RasPi", deviceId, "Result", "json", decision)
+        except:
+            traceback.print_exc()
 
 try:
     options = {
@@ -67,8 +70,8 @@ try:
     client.connect()
     os.chdir("pfolder")
     client.deviceEventCallback = my_callback
-    client.subscribeToDeviceEvents(event="SensorData")
-
+    #client.subscribeToDeviceEvents(event="SensorData")
+    client.subscribeToDeviceEvents()
     print options
 
 except ibmiotf.ConnectionException as e:
@@ -107,7 +110,7 @@ def ajax_send():
         result = "Open"
 
     myData = create_json()
-    print myData
+    print "The data sent is " + myData
     # client.publishEvent("RasPi", deviceId, "class", "json", myData)
     return ""
 
@@ -117,7 +120,7 @@ def ajax_res():
     data = {}
     data["result"] = result
     data["data"] = curr_data
-    output = "The data received is : " + curr_data + "\n The door is " + result
+    output = "The data received is : " + curr_data + "<br/>The door is " + result 
     #return json.dumps(data)
     return output
 
