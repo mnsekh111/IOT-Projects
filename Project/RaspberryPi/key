@@ -1,0 +1,18 @@
+raspi
+
+Organization ID umfkbu
+Device Type RasPi
+Device ID b827ebaf79e5
+Authentication Method token
+Authentication Token abcdefgh
+
+
+
+
+server
+
+Organization ID umfkbu
+Device Type Server
+Device ID 123456
+Authentication Method token
+Authentication Token abcdefgh

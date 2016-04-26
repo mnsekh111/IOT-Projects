@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            console.log("ready!");
+            var req = new XMLHttpRequest()
+            req.onreadystatechange = function () {
+                if (req.readyState == 4 && req.status == 200) {
+                    console.log(req.responseText)
+                    json = JSON.parse(req.responseText)
+                    console.log(json["train"])
+                    if (parseInt(json["train"]) == 0) {
+                        $("#divTrain").hide()
+                        $("#divTest").show()
+                    } else {
+                        $("#divTrain").show()
+                        $("#divTest").hide()
+                        if (parseInt(json["close"]) == 1) {
+                            $("#btnClose").prop("disabled", true);
+                            $("#btnOpen").prop("disabled", false);
+                            $("#btnClear").prop("disabled", false);
+                        } else if (parseInt(json["open"]) == 1) {
+                            $("#btnOpen").prop("disabled", true);
+                            $("#btnClear").prop("disabled", false);
+                            $("#btnClose").prop("disabled", false);
+                        } else if (parseInt(json["clear"]) == 1) {
+                            $("#btnClear").prop("disabled", true);
+                            $("#btnOpen").prop("disabled", false);
+                            $("#btnClose").prop("disabled", false);
+                        }
+                    }
+                }
+            }
+            req.open('POST', '/ajax_rec')
+            req.send()
+            get_fb();
+        });
+
+        function get_fb() {
+            var feedback = $.ajax({
+                type: "POST",
+                url: "/ajax_result",
+                async: false
+            }).success(function () {
+                setTimeout(function () {
+                    get_fb();
+                }, 1000);
+            }).responseText;
+
+            $("#idRes").html(feedback)
+        }
+
+
+        function ttclick(elem) {
+            console.log("click is called")
+            if (elem.id == "btnTrain") {
+                $("#divTrain").show()
+                $("#divTest").hide()
+                //#sendData(1, 0, 0, 0)
+            } else if (elem.id == "btnTest") {
+                $("#divTrain").hide()
+                $("#divTest").show()
+                //sendData(0, 0, 0, 0)
+            } else if (elem.id == "btnClear") {
+                $("#btnClear").prop("disabled", true);
+                $("#btnOpen").prop("disabled", false);
+                $("#btnClose").prop("disabled", false);
+                sendData(1, 1, 0, 0)
+
+            } else if (elem.id == "btnOpen") {
+                $("#btnOpen").prop("disabled", true);
+                $("#btnClear").prop("disabled", false);
+                $("#btnClose").prop("disabled", false);
+                sendData(1, 0, 1, 0)
+
+            } else if (elem.id == "btnClose") {
+                $("#btnClose").prop("disabled", true);
+                $("#btnOpen").prop("disabled", false);
+                $("#btnClear").prop("disabled", false);
+                sendData(1, 0, 0, 1)
+
+            }
+        }
+
+        function sendData(train, clear, open, close) {
+            var req = new XMLHttpRequest()
+            req.onreadystatechange = function () {
+                if (req.readyState == 4) {
+                }
+            }
+            req.open('POST', '/ajax_send')
+            req.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+            var postVars = 'train=' + train + '&clear=' + clear + '&open=' + open + '&close=' + close
+            req.send(postVars)
+
+            return false
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="jumbotron">
+        <h1>CSC591 Project</h1>
+        <span class="label label-default" style="font-size: medium">Sekhar Natarajan</span>
+        <span class="label label-primary" style="font-size: medium">Dhaval</span>
+        <span class="label label-success" style="font-size: medium">Zhipeng</span>
+        <span class="label label-info" style="font-size: medium">Mike</span>
+    </div>
+</div>
+<nav>
+    <ul class="pager">
+        <button type="button" class="btn btn-primary" id="btnTrain" onclick="ttclick(this)">Training</button>
+        <button type="button" class="btn btn-primary" id="btnTest" onclick="ttclick(this)">Testing</button>
+    </ul>
+</nav>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 " style="background-color:lavender;" id="divTrain">
+            <div class="h1 text-center">Training</div>
+            <table class="table table-responsive">
+                <thead>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <span class="h3"> Clear the training CSV file</span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-lg btn-danger text-center" id="btnClear"
+                                onclick="ttclick(this)" style="width: 100%;">Clear
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="h3">Set the training class to Open</span>
+                    </td>
+                    <td>
+
+                        <button type="button" class="btn btn-lg btn-success" id="btnOpen" onclick="ttclick(this)"
+                                style="width: 100%;">Set
+                            opening
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="h3">Set the training class to close</span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-lg btn-danger" id="btnClose" onclick="ttclick(this)"
+                                style="width: 100%;">Set
+                            closing
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12" style="background-color:lavenderblush;" id="divTest">
+        	<div class="h1 text-center">Results</div>
+            <div class="h1 text-center" id="idRes">Testing</div>
+            <div class="h1 text-center" id="idDat">Data</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
