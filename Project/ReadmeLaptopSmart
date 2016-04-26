@@ -1,0 +1,6 @@
+ The client to show the decision and data is present at aiserver.mybluemix.net
+ 
+ Once the url is reached, click on the test tab and move the door.
+ The data that is generated from the raspberry pi is displayed along with the decision of the classifier.
+ 
+ This updates in real time.
